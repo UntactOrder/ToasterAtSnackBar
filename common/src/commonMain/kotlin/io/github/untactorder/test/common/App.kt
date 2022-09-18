@@ -1,9 +1,8 @@
 package io.github.untactorder.test.common
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,8 +10,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import io.github.untactorder.toasterAtSnackBar.Bartender
 import io.github.untactorder.toasterAtSnackBar.InjectableSnackBar
+import io.github.untactorder.toasterAtSnackBar.SnackBarToastWithTitle
 
 @Composable
 fun App(modifier: Modifier = Modifier.fillMaxSize()) {
@@ -48,9 +50,10 @@ fun MainScreen2() {
     var injector = InjectableSnackBar()
 
     injector.FloatingSnackBar(
-        snackbarHost = {
-            Text("Show SnackBar")
-        }
+        snackbarHost = { hostState ->
+            Bartender(hostState = hostState)
+        },
+        snackBarAlignment = Alignment.BottomStart
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -58,16 +61,31 @@ fun MainScreen2() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(modifier = Modifier.padding(12.dp), onClick = {
+                textState += "hi hihi ho hohohoohohohohho "
                 injector.showSnackbar(
                     "textState : $textState",
-                    actionLabel = "Do something"
+                    title = "제목입니다.",
+                    actionLabel = "Do something",
+                    actionOnNewLine = false,
+                    customToastDesign = { data ->
+                        SnackBarToastWithTitle(data)
+                    }
                 )
             }) {
                 Text("Sweet Toast Info")
             }
 
-            Column {
-                //TextField(value = textState, onValueChange = { textValue -> textState = textValue })
+            Button(modifier = Modifier.padding(12.dp), onClick = {
+                injector.showSnackbar(
+                    "textState : $textState",
+                    title = "제목",
+                    withDismissAction = false,
+                    customToastDesign = { data ->
+                        SnackBarToastWithTitle(data, shape = RoundedCornerShape(36.dp))
+                    }
+                )
+            }) {
+                Text("Show Toast")
             }
         }
 

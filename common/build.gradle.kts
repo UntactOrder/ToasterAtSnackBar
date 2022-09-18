@@ -107,11 +107,11 @@ android {
                 "/META-INF/{AL2.0,LGPL2.1}",
                 "/META-INF/LICENSE*"
             )
-            pickFirsts += "/bundle.properties"  // for kmqtt-client paho java lib
+            pickFirsts += "/bundle.properties"
         }
     }
 }
 
 multiplatformResources {
-    multiplatformResourcesPackage = rootProject.extra["organization"] as String? + ".orderbroker.common"
+    multiplatformResourcesPackage = rootProject.extra["organization"] as String? + ".test.common"
 }

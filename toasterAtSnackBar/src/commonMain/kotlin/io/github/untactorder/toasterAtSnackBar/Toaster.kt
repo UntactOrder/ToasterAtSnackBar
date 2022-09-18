@@ -2,10 +2,7 @@ package io.github.untactorder.toasterAtSnackBar
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,25 +14,57 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-class InjectableSnackBar {
-    lateinit var snackbarHostState: SnackbarHostState
-    lateinit var lifecycleScope: CoroutineScope
+open class InjectableSnackBar(
+    snackbarHostState: SnackbarHostState? = null,
+    lifecycleScope: CoroutineScope? = null,
+) {
+    private lateinit var snackbarHostState: SnackbarHostState
+    private lateinit var lifecycleScope: CoroutineScope
+
+    val hostState: SnackbarHostState
+        @Composable
+        get() {
+            this.issueState()
+            return snackbarHostState
+        }
+
+    init {
+        if (snackbarHostState != null) {
+            this.snackbarHostState = snackbarHostState
+        }
+        if (lifecycleScope != null) {
+            this.lifecycleScope = lifecycleScope
+        }
+    }
 
     @Composable
+    private fun issueState() {
+        if (!this::snackbarHostState.isInitialized) {
+            this.snackbarHostState = remember { SnackbarHostState() }
+        }
+        if (!this::lifecycleScope.isInitialized) {
+            this.lifecycleScope = rememberCoroutineScope()
+        }
+    }
+
+    /**
+     * Embed a Snackbar in the UI.
+     * @param minWidth: The minimum width of the Snackbar.
+     * @param preferredRatio: The preferred Width/Height ratio of the Snackbar.
+     */
+    @Composable
     fun EmbeddedSnackBar(
-        snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-        lifecycleScope: CoroutineScope = rememberCoroutineScope(),
         snackBarModifier: Modifier = Modifier.wrapContentSize(),
-        snackbarHost: @Composable (SnackbarHostState) -> Unit = { SnackbarHost(it) }
+        snackbarHost: @Composable (SnackbarHostState) -> Unit = { Bartender(it) }
     ) {
-        this.snackbarHostState = snackbarHostState
-        this.lifecycleScope = lifecycleScope
+        issueState()  // state have to be issued before using
 
         Surface(modifier = snackBarModifier, color = Color.Transparent, contentColor = contentColorFor(Color.Transparent)) {
             SubcomposeLayout { constraints ->
-                val layoutWidth = constraints.maxWidth
                 val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
-                val boilerBody: @Composable (PaddingValues) -> Unit = {}
+                val boilerBody: @Composable (PaddingValues) -> Unit = {
+                    Surface(Modifier.padding(it)) {}
+                }
 
                 val snackbarPlaceables = subcompose(1) {
                     snackbarHost(snackbarHostState)
@@ -44,15 +73,16 @@ class InjectableSnackBar {
                 }
 
                 val snackbarHeight = snackbarPlaceables.maxByOrNull { it.height }?.height ?: 0
+                val snackbarWidth = snackbarPlaceables.maxByOrNull { it.width }?.width ?: 0
                 val bodyContentPlaceables = subcompose(0) {
                     boilerBody(PaddingValues(bottom = 0.dp))
-                }.map { it.measure(looseConstraints.copy(maxHeight = snackbarHeight)) }
+                }.map { it.measure(looseConstraints.copy(maxHeight = constraints.maxHeight)) }
 
-                layout(layoutWidth, snackbarHeight) {
-                    bodyContentPlaceables.forEach {
+                layout(snackbarWidth, snackbarHeight) {
+                    snackbarPlaceables.forEach {
                         it.place(0, 0)
                     }
-                    snackbarPlaceables.forEach {
+                    bodyContentPlaceables.forEach {
                         it.place(0, 0)
                     }
                 }
@@ -60,45 +90,60 @@ class InjectableSnackBar {
         }
     }
 
-
+    /**
+     * Show a floating Snackbar with a message.
+     */
     @Composable
     fun FloatingSnackBar(
-        modifier: Modifier = Modifier.fillMaxSize(),
-        snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-        lifecycleScope: CoroutineScope = rememberCoroutineScope(),
+        boxModifier: Modifier = Modifier.fillMaxSize(),
         snackBarModifier: Modifier = Modifier.wrapContentSize(),
-        snackBarAlignment: Alignment = Alignment.BottomCenter,
-        snackbarHost: @Composable (SnackbarHostState) -> Unit = { SnackbarHost(it) },
+        snackBarAlignment: Alignment = Alignment.BottomStart,
+        snackbarHost: @Composable (SnackbarHostState) -> Unit = { Bartender(it) },
         content: @Composable () -> Unit = {}
     ) {
-        Box(modifier) {
+        Box(boxModifier) {
             content()
-            // @TODO this.sefelkjlkjkj
-            EmbeddedSnackBar(snackbarHostState, lifecycleScope, snackBarModifier.align(snackBarAlignment), snackbarHost)
+            EmbeddedSnackBar(snackBarModifier.align(snackBarAlignment), snackbarHost)
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     suspend fun showSnackbarInCoroutine(
         message: String,
+        title: String? = null,
         actionLabel: String? = null,
-        withDismissAction: Boolean = false,
+        actionOnNewLine: Boolean = false,
+        withDismissAction: Boolean = true,
         duration: SnackbarDuration = SnackbarDuration.Short,
+        customToastDesign: @Composable ((SnackbarData) -> Unit)? = null,
         dismissed: () -> Unit = {}, performed: () -> Unit = {}
     ) {
-        when (snackbarHostState.showSnackbar(message, actionLabel, true, duration)) {
+        when (snackbarHostState.showSnackbar(
+            BillLetterVisual(message, title, actionLabel, actionOnNewLine,
+                withDismissAction, duration, customToastDesign)
+        )) {
             SnackbarResult.Dismissed -> dismissed()
             SnackbarResult.ActionPerformed -> performed()
         }
     }
 
+    /**
+     * You should not use this method in a Composable function.
+     * Main thread may interrupt by this method. So, use InComposableShowSnackbar instead.
+     */
     fun showSnackbar(
         message: String,
+        title: String? = null,
         actionLabel: String? = null,
+        actionOnNewLine: Boolean = false,
+        withDismissAction: Boolean = true,
         duration: SnackbarDuration = SnackbarDuration.Short,
+        customToastDesign: @Composable ((SnackbarData) -> Unit)? = null,
         dismissed: () -> Unit = {}, performed: () -> Unit = {}
     ) {
         lifecycleScope.launch {
-            showSnackbarInCoroutine(message, actionLabel, true, duration, dismissed, performed)
+            showSnackbarInCoroutine(message, title, actionLabel, actionOnNewLine,
+                withDismissAction, duration, customToastDesign, dismissed, performed)
         }
     }
 
@@ -108,26 +153,31 @@ class InjectableSnackBar {
     @Composable
     fun InComposableShowSnackbar(
         message: String,
+        title: String? = null,
         actionLabel: String? = null,
+        actionOnNewLine: Boolean = false,
+        withDismissAction: Boolean = true,
         duration: SnackbarDuration = SnackbarDuration.Short,
+        customToastDesign: @Composable ((SnackbarData) -> Unit)? = null,
         dismissed: () -> Unit = {}, performed: () -> Unit = {}
     ) {
         LaunchedEffect(snackbarHostState) {
-            showSnackbarInCoroutine(message, actionLabel, true, duration, dismissed, performed)
+            showSnackbarInCoroutine(message, title, actionLabel, actionOnNewLine,
+                withDismissAction, duration, customToastDesign, dismissed, performed)
         }
     }
 }
+
 
 @Composable
 fun Bartender(
     hostState: SnackbarHostState,
     modifier: Modifier = Modifier,
-    animated: @Composable () -> Unit = { FadeInFadeOutWithScale(
-        current = hostState.currentSnackbarData,
-        modifier = modifier,
-        content = snackbar
-    )},
-    snackbar: @Composable (SnackbarData) -> Unit = { Snackbar(it) }
+    customAnimation: (@Composable (
+        current: SnackbarData?,
+        modifier: Modifier,
+        content: @Composable ((SnackbarData) -> Unit)
+    ) -> Unit)? = null
 ) {
     val currentSnackbarData = hostState.currentSnackbarData
     val accessibilityManager = LocalAccessibilityManager.current
@@ -141,43 +191,59 @@ fun Bartender(
             currentSnackbarData.dismiss()
         }
     }
-    animated()
+    val snackbarWidget = @Composable { data: SnackbarData ->
+        val details = data.visuals
+        if (details is BillLetterVisual) {
+            val customToastDesign = details.customToastDesign
+            if (customToastDesign is @Composable ((SnackbarData) -> Unit)) {
+                customToastDesign(data)
+            } else {
+                SnackBarToastWithTitle(data)
+            }
+        } else {
+            SnackBarToast(data)
+        }
+    }
+    if (customAnimation == null) {
+        FadeInFadeOutWithScale(hostState.currentSnackbarData, modifier, snackbarWidget)
+    } else {
+        customAnimation(hostState.currentSnackbarData, modifier, snackbarWidget)
+    }
 }
 
-/*
-@Composable
-fun DefaultSnackbar(
-    snackbarHostState: SnackbarHostState,
-    modifier: Modifier = Modifier,
-    onDismiss: () -> Unit = { }
-) {
-    SnackbarHost(
-        hostState = snackbarHostState,
-        snackbar = { data ->
-            Snackbar(
-                modifier = Modifier.padding(16.dp),
-                content = {
-                    Text(
-                        text = data.message,
-                        style = MaterialTheme.typography.body2
-                    )
-                },
-                action = {
-                    data.actionLabel?.let { actionLabel ->
-                        TextButton(onClick = onDismiss) {
-                            Text(
-                                text = actionLabel,
-                                color= MaterialTheme.colors.primary,
-                                style = MaterialTheme.typography.body2
-                            )
-                        }
-                    }
-                }
-            )
-        },
-        modifier = modifier
-            .fillMaxWidth()
-            .wrapContentHeight(Alignment.Bottom)
-    )
+
+open class BillLetterVisual(
+    override val message: String,
+    val title: String?,
+    override val actionLabel: String?,
+    val actionOnNewLine: Boolean = false,
+    override val withDismissAction: Boolean,
+    override val duration: SnackbarDuration,
+    val customToastDesign: @Composable ((SnackbarData) -> Unit)?
+) : SnackbarVisuals {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as BillLetterVisual
+
+        if (message != other.message) return false
+        if (actionLabel != other.actionLabel) return false
+        if (withDismissAction != other.withDismissAction) return false
+        if (duration != other.duration) return false
+        if (title != other.title) return false
+        if (customToastDesign != other::customToastDesign) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = message.hashCode()
+        result = 31 * result + actionLabel.hashCode()
+        result = 31 * result + withDismissAction.hashCode()
+        result = 31 * result + duration.hashCode()
+        result = 31 * result + title.hashCode()
+        result = 31 * result + customToastDesign.hashCode()
+        return result
+    }
 }
-*/

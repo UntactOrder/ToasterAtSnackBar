@@ -6,7 +6,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = "OrderBroker"
+rootProject.name = "ToasterAtSnackBar"
 
 include(":android")
 include(":desktop")

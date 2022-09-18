@@ -11,7 +11,7 @@ dependencies {
 }
 
 android {
-    namespace = rootProject.extra["organization"] as String? + ".orderbroker"
+    namespace = rootProject.extra["organization"] as String? + ".test.toasterAtSnackbar"
     compileSdk = rootProject.extra["android_target_sdk_version"] as Int?
     buildToolsVersion = rootProject.extra["android_build_tool_version"] as String
     testOptions {
@@ -20,7 +20,7 @@ android {
         }
     }
     defaultConfig {
-        applicationId = rootProject.extra["organization"] as String? + ".orderbroker"
+        applicationId = rootProject.extra["organization"] as String? + ".test.toasterAtSnackbar"
         minSdk = rootProject.extra["android_min_sdk_version"] as Int?
         targetSdk = rootProject.extra["android_target_sdk_version"] as Int?
         versionCode = 1
@@ -61,7 +61,7 @@ android {
                 "/META-INF/{AL2.0,LGPL2.1}",
                 "/META-INF/LICENSE*"
             )
-            pickFirsts += "/bundle.properties"  // for kmqtt-client paho java lib
+            pickFirsts += "/bundle.properties"
         }
     }
 }
