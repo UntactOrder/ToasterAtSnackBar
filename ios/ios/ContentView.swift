@@ -1,10 +1,9 @@
 import SwiftUI
+import common
 
 
 struct ContentView: View {
-    var body: some View {
-        Text("Hello, World!")
-    }
+    IosApp()
 }
 
 struct ContentView_Previews: PreviewProvider {

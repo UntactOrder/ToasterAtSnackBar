@@ -8,7 +8,7 @@ plugins {
 }
 
 kotlin {
-    android()/*
+    android()
 
     listOf(
         iosX64(),
@@ -20,7 +20,7 @@ kotlin {
             export("dev.icerock.moko:resources:${rootProject.extra["moko_res_version"]}")
             export("dev.icerock.moko:graphics:0.9.0")  // toUIColor here
         }
-    }*/
+    }
 
     jvm("desktop") {
         compilations.all {
@@ -60,7 +60,7 @@ kotlin {
                 implementation("androidx.test.ext:junit-ktx:1.1.3")
                 implementation("junit:junit:4.13.2")
             }
-        }/*
+        }
         val iosX64Main by getting
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
@@ -78,7 +78,7 @@ kotlin {
             iosX64Test.dependsOn(this)
             iosArm64Test.dependsOn(this)
             iosSimulatorArm64Test.dependsOn(this)
-        }*/
+        }
         val desktopMain by getting {
             dependencies {
                 api(compose.preview)

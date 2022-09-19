@@ -112,5 +112,5 @@ android {
 }
 
 multiplatformResources {
-    multiplatformResourcesPackage = rootProject.extra["organization"] as String? + ".shared"
+    multiplatformResourcesPackage = rootProject.extra["organization"] as String? + ".toasterAtSnackBar"
 }
