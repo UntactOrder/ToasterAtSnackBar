@@ -12,9 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.github.untactorder.toasterAtSnackBar.Bartender
-import io.github.untactorder.toasterAtSnackBar.InjectableSnackBar
-import io.github.untactorder.toasterAtSnackBar.SnackBarToastWithTitle
+import io.github.untactorder.toasterAtSnackBar.*
 
 @Composable
 fun App(modifier: Modifier = Modifier.fillMaxSize()) {
@@ -48,46 +46,72 @@ fun MainScreen2() {
     var textState by rememberSaveable { mutableStateOf("") }
 
     var injector = InjectableSnackBar()
+    var injector2 = InjectableSnackBar()
 
     injector.FloatingSnackBar(
-        snackbarHost = { hostState ->
-            Bartender(hostState = hostState)
-        },
         snackBarAlignment = Alignment.BottomStart
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+        injector2.FloatingSnackBar(
+            snackBarModifier = Modifier.width(300.dp).wrapContentSize(),
+            snackBarAlignment = Alignment.Center
         ) {
-            Button(modifier = Modifier.padding(12.dp), onClick = {
-                textState += "Hello World! "
-                injector.showSnackbar(
-                    "textState : $textState",
-                    title = "Title",
-                    actionLabel = "Do something",
-                    actionOnNewLine = false,
-                    customToastDesign = { data ->
-                        SnackBarToastWithTitle(data)
-                    }
-                )
-            }) {
-                Text("Sweet Toast Info")
-            }
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Button(modifier = Modifier.padding(12.dp), onClick = {
+                    textState += "Hello World! "
+                    injector.showSnackbar(
+                        "textState : $textState",
+                        title = "Title",
+                        actionLabel = "Do something",
+                        actionOnNewLine = false,
+                        customToastDesign = { data ->
+                            SnackBarToastWithTitle(data)
+                        }
+                    )
+                }) {
+                    Text("Sweet Toast Info")
+                }
 
-            Button(modifier = Modifier.padding(12.dp), onClick = {
-                injector.showSnackbar(
-                    "textState : $textState",
-                    title = "Title",
-                    withDismissAction = false,
-                    customToastDesign = { data ->
-                        SnackBarToastWithTitle(data, shape = RoundedCornerShape(36.dp))
-                    }
-                )
-            }) {
-                Text("Show Toast")
+                Button(modifier = Modifier.padding(12.dp), onClick = {
+                    injector.showSnackbar(
+                        "textState : $textState",
+                        title = "Title",
+                        withDismissAction = false,
+                        customToastDesign = { data ->
+                            SnackBarToastWithTitle(data, shape = RoundedCornerShape(36.dp))
+                        }
+                    )
+                }) {
+                    Text("Show Toast")
+                }
+
+                Button(modifier = Modifier.padding(12.dp), onClick = {
+                    injector2.showSnackbar(
+                        "Please retry",
+                        title = "An Error Occurred",
+                        withDismissAction = true,
+                        customToastDesign = { data ->
+                            IosStypeToast(data, containerColor = Color.Black)
+                        }
+                    )
+                }) {
+                    Text("Show IOS Toast")
+                }
+
+                Button(modifier = Modifier.padding(12.dp), onClick = {
+                    injector2.showSnackbar(
+                        "Hi there! Welcome to the Toast! Have a nice day!",
+                        customToastDesign = { data ->
+                            IosSimpleToast(data)
+                        }
+                    )
+                }) {
+                    Text("Show IOS Simple Toast")
+                }
             }
         }
-
     }
 }

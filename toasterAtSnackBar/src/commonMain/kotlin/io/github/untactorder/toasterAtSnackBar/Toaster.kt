@@ -49,8 +49,6 @@ open class InjectableSnackBar(
 
     /**
      * Embed a Snackbar in the UI.
-     * @param minWidth: The minimum width of the Snackbar.
-     * @param preferredRatio: The preferred Width/Height ratio of the Snackbar.
      */
     @Composable
     fun EmbeddedSnackBar(
@@ -213,13 +211,13 @@ fun Bartender(
 
 
 open class BillLetterVisual(
-    override val message: String,
-    val title: String?,
-    override val actionLabel: String?,
-    val actionOnNewLine: Boolean = false,
-    override val withDismissAction: Boolean,
-    override val duration: SnackbarDuration,
-    val customToastDesign: @Composable ((SnackbarData) -> Unit)?
+    override var message: String,
+    var title: String?,
+    override var actionLabel: String?,
+    var actionOnNewLine: Boolean = false,
+    override var withDismissAction: Boolean,
+    override var duration: SnackbarDuration,
+    var customToastDesign: @Composable ((SnackbarData) -> Unit)?
 ) : SnackbarVisuals {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
