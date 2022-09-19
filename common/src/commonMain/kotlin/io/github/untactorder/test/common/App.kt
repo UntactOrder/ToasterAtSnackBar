@@ -44,6 +44,7 @@ fun App(modifier: Modifier = Modifier.fillMaxSize()) {
 @Composable
 fun MainScreen2() {
     var textState by rememberSaveable { mutableStateOf("") }
+    var boolState by rememberSaveable { mutableStateOf(true) }
 
     var injector = InjectableSnackBar()
     var injector2 = InjectableSnackBar()
@@ -52,7 +53,7 @@ fun MainScreen2() {
         snackBarAlignment = Alignment.BottomStart
     ) {
         injector2.FloatingSnackBar(
-            snackBarModifier = Modifier.width(300.dp).wrapContentSize(),
+            snackBarModifier = Modifier.wrapContentSize(),
             snackBarAlignment = Alignment.Center
         ) {
             Column(
@@ -94,7 +95,8 @@ fun MainScreen2() {
                         title = "An Error Occurred",
                         withDismissAction = true,
                         customToastDesign = { data ->
-                            IosStypeToast(data, containerColor = Color.Black)
+                            IosStypeToast(data, containerColor = Color.Black, modifier = Modifier
+                                .width(400.dp).padding(12.dp))
                         }
                     )
                 }) {
@@ -102,10 +104,12 @@ fun MainScreen2() {
                 }
 
                 Button(modifier = Modifier.padding(12.dp), onClick = {
+                    boolState = !boolState
                     injector2.showSnackbar(
                         "Hi there! Welcome to the Toast! Have a nice day!",
                         customToastDesign = { data ->
-                            IosSimpleToast(data)
+                            IosSimpleToast(data, darkBackground = boolState, modifier = Modifier
+                                .width(200.dp).padding(12.dp))
                         }
                     )
                 }) {

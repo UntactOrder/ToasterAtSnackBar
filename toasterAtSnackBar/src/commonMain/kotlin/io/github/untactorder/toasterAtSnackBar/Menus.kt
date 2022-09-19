@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,6 +49,30 @@ data class SnackBarColorData(
 )
 
 
+var defaultActionComposable: @Composable (SnackbarData, String, Color) -> Unit = {
+        snackbarData, actionLabel, actionColor ->
+    TextButton(
+        colors = ButtonDefaults.textButtonColors(contentColor = actionColor),
+        onClick = { snackbarData.performAction() },
+        content = { Text(actionLabel) }
+    )
+}
+
+
+var defaultDismissActionComposable: @Composable (SnackbarData, Modifier) -> Unit = { data, modifier ->
+    IconButton(
+        modifier = modifier,
+        onClick = { data.dismiss() },
+        content = {
+            Icon(
+                Icons.Filled.Close,
+                contentDescription = StringDesc.Resource(MR.strings.dismiss_snackbar).toString()
+            )
+        }
+    )
+}
+
+
 @Composable
 fun SnackBarToast(
     snackbarData: SnackbarData,
@@ -57,6 +82,12 @@ fun SnackBarToast(
     bottomShift: Dp = 10.dp,
     actionColor: Color = Color.White,
     snackBarColorData: SnackBarColorData? = null,
+    actionComposable: @Composable (String) -> Unit = @Composable { text ->
+        defaultActionComposable(snackbarData, text, actionColor)
+    },
+    dismissActionComposable: @Composable () -> Unit = @Composable {
+        defaultDismissActionComposable(snackbarData, Modifier.padding(end = innerMarginEnd))
+    },
     contents: @Composable () -> Unit = { Text(snackbarData.visuals.message) }
 ) {
     val details = snackbarData.visuals
@@ -72,39 +103,19 @@ fun SnackBarToast(
     }
 
     val actionLabel = details.actionLabel
-    val actionComposable: (@Composable () -> Unit)? = if (actionLabel != null) {
+    val action: (@Composable () -> Unit)? = if (actionLabel != null) {
         @Composable {
-            TextButton(
-                colors = ButtonDefaults.textButtonColors(contentColor = actionColor),
-                onClick = { snackbarData.performAction() },
-                content = { Text(actionLabel) }
-            )
+            actionComposable(actionLabel)
         }
     } else {
         null
     }
-    val dismissActionComposable: (@Composable () -> Unit)? =
-        if (details.withDismissAction) {
-            @Composable {
-                IconButton(
-                    onClick = { snackbarData.dismiss() },
-                    content = {
-                        Icon(
-                            Icons.Filled.Close,
-                            modifier = Modifier.padding(end = innerMarginEnd),
-                            contentDescription = StringDesc.Resource(MR.strings.dismiss_snackbar).toString()
-                        )
-                    }
-                )
-            }
-        } else {
-            null
-        }
+    val dismissAction = if (details.withDismissAction) dismissActionComposable else null
     if (snackBarColorData is SnackBarColorData) {
         Snackbar(
             modifier = modifier,
-            action = actionComposable,
-            dismissAction = dismissActionComposable,
+            action = action,
+            dismissAction = dismissAction,
             actionOnNewLine = actionOnNewLine,
             shape = shape,
             containerColor = snackBarColorData.containerColor,
@@ -114,7 +125,7 @@ fun SnackBarToast(
             content = content
         )
     } else {
-        Snackbar(modifier, actionComposable, dismissActionComposable, actionOnNewLine, shape, content = content)
+        Snackbar(modifier, action, dismissAction, actionOnNewLine, shape, content = content)
     }
 }
 
@@ -133,6 +144,12 @@ fun SnackBarToastWithTitle(
         actionContentColor = actionColor,
         dismissActionContentColor = actionColor
     ),  // Material 3
+    actionComposable: @Composable (String) -> Unit = @Composable { text ->
+        defaultActionComposable(snackbarData, text, actionColor)
+    },
+    dismissActionComposable: @Composable () -> Unit = @Composable {
+        defaultDismissActionComposable(snackbarData, Modifier.padding(end = innerMarginEnd))
+    },
     contentContainer: @Composable (@Composable () -> Unit) -> Unit = {
         Column {
             it()
@@ -155,8 +172,8 @@ fun SnackBarToastWithTitle(
 ) {
     SnackBarToast(
         snackbarData, modifier, shape,
-        innerMarginStart,innerMarginEnd, bottomShift,
-        actionColor, snackBarColorData)
+        innerMarginStart, innerMarginEnd, bottomShift,
+        actionColor, snackBarColorData, actionComposable, dismissActionComposable)
     {
         val details = snackbarData.visuals
         contentContainer {
@@ -177,7 +194,8 @@ fun SnackBarToastWithTitle(
 @Composable
 fun IosStypeToast(
     snackbarData: SnackbarData,
-    modifier: Modifier = Modifier.padding(12.dp),
+    modifier: Modifier = Modifier.width(400.dp).padding(12.dp),
+    innerMarginStart: Dp = 10.dp, innerMarginEnd: Dp = 10.dp,
     shape: Shape = RoundedCornerShape(50.dp),
     fontFamily: FontFamily = FontFamily.Default,
     icon: @Composable (String) -> Unit = { contentDescription ->
@@ -192,9 +210,11 @@ fun IosStypeToast(
     containerColor: Color = Color.White
 ) {
     val details = snackbarData.visuals
+    val withDismissAction = details.withDismissAction
     if (details is BillLetterVisual) {
         details.actionLabel = null
         details.actionOnNewLine = false
+        details.withDismissAction = false
     }
     val backgroundColor = if (containerColor == Color.White) Color.White else Color.Black
     val contentColor = if (containerColor != Color.White) Color.White else Color.Black
@@ -202,8 +222,9 @@ fun IosStypeToast(
         snackbarData = snackbarData,
         modifier = modifier,
         shape = shape,
-        innerMarginStart = 14.dp,
-        innerMarginEnd = 16.dp,
+        innerMarginStart = innerMarginStart,
+        innerMarginEnd = innerMarginEnd,
+        bottomShift = 0.dp,
         actionColor = contentColor,
         snackBarColorData = SnackBarColorData(
             containerColor = backgroundColor,
@@ -211,21 +232,27 @@ fun IosStypeToast(
             actionContentColor = contentColor,
             dismissActionContentColor = contentColor
         ),
+        dismissActionComposable = {},
         contentContainer = {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(end = if (withDismissAction) 0.dp else innerMarginEnd),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                icon(details.message)
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Row(
+                    modifier = Modifier.weight(1.0f, true),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    it()
+                    icon(details.message)
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        it()
+                    }
                 }
-                if (!details.withDismissAction) {
-                    Spacer(modifier = Modifier.padding(end = 8.dp))
+                if (withDismissAction) {
+                    defaultDismissActionComposable(snackbarData, Modifier.padding(top = 2.5.dp))
                 }
             }
         },
@@ -237,7 +264,9 @@ fun IosStypeToast(
                         color = contentColor,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = fontFamily
+                        fontFamily = fontFamily,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
                     )
                 }
             }
@@ -245,7 +274,7 @@ fun IosStypeToast(
         body = {
             if (snackbarData.visuals.message != "") {
                 Text(snackbarData.visuals.message, color = Color(0xFFA2A2A2), // Grey Color
-                    fontSize = 12.sp, fontFamily = fontFamily)
+                    fontSize = 12.sp, fontFamily = fontFamily, overflow = TextOverflow.Ellipsis, maxLines = 1)
             }
         }
     )
@@ -254,18 +283,17 @@ fun IosStypeToast(
 
 /**
  * A Simple Toast with iOS style.
- * @param containerColor: Only accept White and Black. And if containerColor is not Color.White, contentColor replaced with Color.Black.
  * [Notice] The variable snackbarData.visuals.message is only reflected in this function. Others will be ignored.
  */
 @Composable
 fun IosSimpleToast(
     snackbarData: SnackbarData,
-    modifier: Modifier = Modifier.padding(12.dp),
+    modifier: Modifier = Modifier.width(300.dp).padding(12.dp),
     shape: Shape = RoundedCornerShape(8.dp),
     fontFamily: FontFamily = FontFamily.Default,
-    containerColor: Color = Color.White,
-    contents: @Composable () -> Unit = {
-        Text(snackbarData.visuals.message, color = Color(0xFF525358),  // Dark Grey Color
+    darkBackground: Boolean = false,
+    contents: @Composable (Color) -> Unit = { color ->
+        Text(snackbarData.visuals.message, color = color,
             fontSize = 15.sp, fontFamily = fontFamily, textAlign = TextAlign.Center)
     }
 ) {
@@ -275,8 +303,12 @@ fun IosSimpleToast(
         details.actionOnNewLine = false
         details.withDismissAction = false
     }
-    val backgroundColor = Color(0xF6dddfe3)  // Light Grey Color
-    val contentColor = Color(0xFF525358)  // Dark Grey Color
+    var backgroundColor = Color(0xF6dddfe3)  // Light Grey Color
+    var contentColor = Color(0xFF525358)  // Dark Grey Color
+    if (darkBackground) {
+        contentColor = backgroundColor
+        backgroundColor = Color(0xF635373f)  // Dark Blue-Grey Color
+    }
     SnackBarToastWithTitle(
         snackbarData = snackbarData,
         modifier = modifier,
@@ -291,7 +323,7 @@ fun IosSimpleToast(
         ),
         contentContainer = {
             Column(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier.padding(8.dp).padding(end = 10.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -299,6 +331,6 @@ fun IosSimpleToast(
             }
         },
         title = {},
-        body = contents
+        body = { contents(contentColor) }
     )
 }
