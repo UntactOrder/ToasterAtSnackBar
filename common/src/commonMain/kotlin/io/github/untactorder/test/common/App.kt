@@ -61,10 +61,10 @@ fun MainScreen2() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(modifier = Modifier.padding(12.dp), onClick = {
-                textState += "hi hihi ho hohohoohohohohho "
+                textState += "Hello World! "
                 injector.showSnackbar(
                     "textState : $textState",
-                    title = "제목입니다.",
+                    title = "Title",
                     actionLabel = "Do something",
                     actionOnNewLine = false,
                     customToastDesign = { data ->
@@ -78,7 +78,7 @@ fun MainScreen2() {
             Button(modifier = Modifier.padding(12.dp), onClick = {
                 injector.showSnackbar(
                     "textState : $textState",
-                    title = "제목",
+                    title = "Title",
                     withDismissAction = false,
                     customToastDesign = { data ->
                         SnackBarToastWithTitle(data, shape = RoundedCornerShape(36.dp))
