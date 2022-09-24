@@ -1,8 +1,6 @@
 package io.github.untactorder.toasterAtSnackBar
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CornerBasedShape
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 /*
  * Copyright 2021 The Android Open Source Project
@@ -33,12 +31,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.icerock.moko.resources.desc.Resource
 import dev.icerock.moko.resources.desc.StringDesc
-import io.github.untactorder.shared.MR
 
 
 data class SnackBarColorData(
@@ -49,8 +45,8 @@ data class SnackBarColorData(
 )
 
 
-var defaultActionComposable: @Composable (SnackbarData, String, Color) -> Unit = {
-        snackbarData, actionLabel, actionColor ->
+var defaultActionComposable: @Composable (SnackbarData, String, Color) -> Unit
+        = { snackbarData, actionLabel, actionColor ->
     TextButton(
         colors = ButtonDefaults.textButtonColors(contentColor = actionColor),
         onClick = { snackbarData.performAction() },
@@ -73,21 +69,24 @@ var defaultDismissActionComposable: @Composable (SnackbarData, Modifier) -> Unit
 }
 
 
+/**
+ * [NOTICE] If snackbarData.visuals.actionOnNewLine is true, contentBoxModifier will be ignored.
+ */
 @Composable
 fun SnackBarToast(
     snackbarData: SnackbarData,
     modifier: Modifier = Modifier.padding(12.dp),
     shape: Shape = RoundedCornerShape(10.dp),
-    innerMarginStart: Dp = 0.dp, innerMarginEnd: Dp = 0.dp,
-    bottomShift: Dp = 10.dp,
     actionColor: Color = Color.White,
     snackBarColorData: SnackBarColorData? = null,
     actionComposable: @Composable (String) -> Unit = @Composable { text ->
         defaultActionComposable(snackbarData, text, actionColor)
     },
     dismissActionComposable: @Composable () -> Unit = @Composable {
-        defaultDismissActionComposable(snackbarData, Modifier.padding(end = innerMarginEnd))
+        defaultDismissActionComposable(snackbarData, Modifier)
     },
+    contentsBoxModifier: Modifier = Modifier.padding(bottom = 10.dp),
+    contentsBoxAlignment: Alignment = Alignment.TopStart,
     contents: @Composable () -> Unit = { Text(snackbarData.visuals.message) }
 ) {
     val details = snackbarData.visuals
@@ -98,7 +97,9 @@ fun SnackBarToast(
     var content = contents
     if (!actionOnNewLine) {
         content = {
-            Column(Modifier.padding(start = innerMarginStart, bottom = bottomShift), content = { contents() })
+            Box(contentsBoxModifier, contentsBoxAlignment) {
+                contents()
+            }
         }
     }
 
@@ -135,8 +136,6 @@ fun SnackBarToastWithTitle(
     snackbarData: SnackbarData,
     modifier: Modifier = Modifier.padding(12.dp),
     shape: Shape = RoundedCornerShape(8.dp),
-    innerMarginStart: Dp = 0.dp, innerMarginEnd: Dp = 0.dp,
-    bottomShift: Dp = 10.dp,
     actionColor: Color = Color(248, 228, 224),
     snackBarColorData: SnackBarColorData = SnackBarColorData(
         containerColor = Color(105, 84, 86),
@@ -148,9 +147,11 @@ fun SnackBarToastWithTitle(
         defaultActionComposable(snackbarData, text, actionColor)
     },
     dismissActionComposable: @Composable () -> Unit = @Composable {
-        defaultDismissActionComposable(snackbarData, Modifier.padding(end = innerMarginEnd))
+        defaultDismissActionComposable(snackbarData, Modifier)
     },
-    contentContainer: @Composable (@Composable () -> Unit) -> Unit = {
+    contentsBoxModifier: Modifier = Modifier.padding(bottom = 10.dp),
+    contentsBoxAlignment: Alignment = Alignment.TopStart,
+    toastContentContainer: @Composable (@Composable () -> Unit) -> Unit = {
         Column {
             it()
         }
@@ -171,12 +172,11 @@ fun SnackBarToastWithTitle(
     }
 ) {
     SnackBarToast(
-        snackbarData, modifier, shape,
-        innerMarginStart, innerMarginEnd, bottomShift,
-        actionColor, snackBarColorData, actionComposable, dismissActionComposable)
+        snackbarData, modifier, shape, actionColor, snackBarColorData,
+        actionComposable, dismissActionComposable, contentsBoxModifier, contentsBoxAlignment)
     {
         val details = snackbarData.visuals
-        contentContainer {
+        toastContentContainer {
             title(details)
             body()
         }
@@ -194,17 +194,17 @@ fun SnackBarToastWithTitle(
 @Composable
 fun IosStypeToast(
     snackbarData: SnackbarData,
-    modifier: Modifier = Modifier.width(400.dp).padding(12.dp),
-    innerMarginStart: Dp = 10.dp, innerMarginEnd: Dp = 10.dp,
+    modifier: Modifier = Modifier.width(300.dp).padding(12.dp),
+    contentsBoxModifier: Modifier = Modifier.padding(10.dp, 10.dp, 10.dp, 0.dp),
+    contentsBoxAlignment: Alignment = Alignment.Center,
     shape: Shape = RoundedCornerShape(50.dp),
     fontFamily: FontFamily = FontFamily.Default,
     icon: @Composable (String) -> Unit = { contentDescription ->
-        Row {
+        Row(modifier = Modifier.padding(end = 16.dp)) {
             Icon(
                 Icons.Filled.Warning,
                 contentDescription = contentDescription
             )
-            Spacer(modifier = Modifier.width(8.dp))
         }
     },
     containerColor: Color = Color.White
@@ -221,10 +221,9 @@ fun IosStypeToast(
     SnackBarToastWithTitle(
         snackbarData = snackbarData,
         modifier = modifier,
+        contentsBoxModifier = contentsBoxModifier,
+        contentsBoxAlignment = contentsBoxAlignment,
         shape = shape,
-        innerMarginStart = innerMarginStart,
-        innerMarginEnd = innerMarginEnd,
-        bottomShift = 0.dp,
         actionColor = contentColor,
         snackBarColorData = SnackBarColorData(
             containerColor = backgroundColor,
@@ -232,49 +231,45 @@ fun IosStypeToast(
             actionContentColor = contentColor,
             dismissActionContentColor = contentColor
         ),
-        dismissActionComposable = {},
-        contentContainer = {
+        toastContentContainer = {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(end = if (withDismissAction) 0.dp else innerMarginEnd),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.weight(1.0f, true),
-                    verticalAlignment = Alignment.CenterVertically
+                icon(details.message)
+                Column(
+                    modifier = Modifier.fillMaxWidth().weight(1.0f, true),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    icon(details.message)
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        it()
-                    }
+                    it()
                 }
                 if (withDismissAction) {
-                    defaultDismissActionComposable(snackbarData, Modifier.padding(top = 2.5.dp))
+                    defaultDismissActionComposable(snackbarData, Modifier)
                 }
             }
         },
         title = { it ->
             if (it is BillLetterVisual) {
                 it.title?.let {
-                    Text(
+                    MarqueeText(
                         text = it,
                         color = contentColor,
-                        fontSize = 14.sp,
+                        gradientEdgeColor = backgroundColor,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = fontFamily,
                         overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
+                        textAlign = TextAlign.Center
                     )
                 }
             }
         },
         body = {
             if (snackbarData.visuals.message != "") {
-                Text(snackbarData.visuals.message, color = Color(0xFFA2A2A2), // Grey Color
-                    fontSize = 12.sp, fontFamily = fontFamily, overflow = TextOverflow.Ellipsis, maxLines = 1)
+                MarqueeText(snackbarData.visuals.message, color = Color(0xFFA2A2A2), // Grey Color
+                    gradientEdgeColor = backgroundColor, fontSize = 12.sp, fontFamily = fontFamily,
+                    overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
             }
         }
     )
@@ -289,6 +284,8 @@ fun IosStypeToast(
 fun IosSimpleToast(
     snackbarData: SnackbarData,
     modifier: Modifier = Modifier.width(300.dp).padding(12.dp),
+    contentsBoxModifier: Modifier = Modifier.padding(8.dp, 8.dp, 8.dp, 8.dp),
+    contentsBoxAlignment: Alignment = Alignment.Center,
     shape: Shape = RoundedCornerShape(8.dp),
     fontFamily: FontFamily = FontFamily.Default,
     darkBackground: Boolean = false,
@@ -312,18 +309,18 @@ fun IosSimpleToast(
     SnackBarToastWithTitle(
         snackbarData = snackbarData,
         modifier = modifier,
+        contentsBoxModifier = contentsBoxModifier,
+        contentsBoxAlignment = contentsBoxAlignment,
         shape = shape,
         actionColor = contentColor,
-        bottomShift = 0.dp,
         snackBarColorData = SnackBarColorData(
             containerColor = backgroundColor,
             contentColor = contentColor,
             actionContentColor = contentColor,
             dismissActionContentColor = contentColor
         ),
-        contentContainer = {
+        toastContentContainer = {
             Column(
-                modifier = Modifier.padding(8.dp).padding(end = 10.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

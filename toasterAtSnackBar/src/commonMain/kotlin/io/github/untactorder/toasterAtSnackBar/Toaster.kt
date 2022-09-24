@@ -214,7 +214,7 @@ open class BillLetterVisual(
     override var message: String,
     var title: String?,
     override var actionLabel: String?,
-    var actionOnNewLine: Boolean = false,
+    var actionOnNewLine: Boolean,
     override var withDismissAction: Boolean,
     override var duration: SnackbarDuration,
     var customToastDesign: @Composable ((SnackbarData) -> Unit)?

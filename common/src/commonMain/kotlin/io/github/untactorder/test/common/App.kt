@@ -82,7 +82,8 @@ fun MainScreen2() {
                         title = "Title",
                         withDismissAction = false,
                         customToastDesign = { data ->
-                            SnackBarToastWithTitle(data, shape = RoundedCornerShape(36.dp))
+                            SnackBarToastWithTitle(data, shape = RoundedCornerShape(36.dp),
+                                contentsBoxModifier = Modifier.padding(start = 10.dp, end = 10.dp))
                         }
                     )
                 }) {
@@ -90,13 +91,14 @@ fun MainScreen2() {
                 }
 
                 Button(modifier = Modifier.padding(12.dp), onClick = {
+                    boolState = !boolState
                     injector2.showSnackbar(
-                        "Please retry",
+                        "Please retry the previous action",
                         title = "An Error Occurred",
                         withDismissAction = true,
                         customToastDesign = { data ->
-                            IosStypeToast(data, containerColor = Color.Black, modifier = Modifier
-                                .width(400.dp).padding(12.dp))
+                            IosStypeToast(data, containerColor = if (boolState) Color.Black else Color.White,
+                                modifier = Modifier.width(300.dp).padding(12.dp))
                         }
                     )
                 }) {
@@ -108,8 +110,8 @@ fun MainScreen2() {
                     injector2.showSnackbar(
                         "Hi there! Welcome to the Toast! Have a nice day!",
                         customToastDesign = { data ->
-                            IosSimpleToast(data, darkBackground = boolState, modifier = Modifier
-                                .width(200.dp).padding(12.dp))
+                            IosSimpleToast(data, darkBackground = boolState,
+                                modifier = Modifier.width(200.dp).padding(12.dp))
                         }
                     )
                 }) {
