@@ -48,10 +48,10 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 api("androidx.compose.ui:ui-tooling-preview:${rootProject.extra["compose_ext_version"]}")
-                api("androidx.compose.material3:material3:1.0.0-alpha16")
-                api("androidx.activity:activity-compose:1.5.1")
-                api("androidx.appcompat:appcompat:1.5.0")
-                api("androidx.core:core-ktx:1.8.0")
+                api("androidx.compose.material3:material3:1.0.0-beta03")
+                api("androidx.activity:activity-compose:1.6.0")
+                api("androidx.appcompat:appcompat:1.5.1")
+                api("androidx.core:core-ktx:1.9.0")
                 api("dev.icerock.moko:resources-compose:${rootProject.extra["moko_res_version"]}")
             }
         }
