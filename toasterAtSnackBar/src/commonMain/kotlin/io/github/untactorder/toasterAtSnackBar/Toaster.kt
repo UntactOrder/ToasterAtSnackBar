@@ -164,6 +164,38 @@ open class InjectableSnackBar(
                 withDismissAction, duration, customToastDesign, dismissed, performed)
         }
     }
+
+    /**
+     * Launch AlertDialog
+     */
+    fun launchAlertDialog(
+        message: String,
+        title: String? = null,
+        actionLabel: String? = null,
+        actionOnNewLine: Boolean = false,
+        withDismissAction: Boolean = true,
+        duration: SnackbarDuration = SnackbarDuration.Indefinite,
+        isClosed: MutableState<Boolean>,
+        touchBlocking: Boolean = false,
+        blockFilterColor: Color = Color.Transparent,
+        maxFilterAlpha: Float = 0.3f,
+        alignment: Alignment = Alignment.Center,
+        dismissed: () -> Unit = {}, performed: () -> Unit = {},
+        enableOutsideClick: Boolean = false,
+        customToastDesign: @Composable (SnackbarData) -> Unit = {}
+    ) {
+        var outsideClick: (() -> Unit)? = null
+        if (enableOutsideClick) {
+            outsideClick = { isClosed.value = true; dismissed() }
+        }
+        showSnackbar(message, title, actionLabel, actionOnNewLine, withDismissAction, duration,
+            dismissed = { isClosed.value = true; dismissed() }, performed = { isClosed.value = true; performed() },
+            customToastDesign = {
+                OpenAlertDialog(isClosed, touchBlocking, blockFilterColor, maxFilterAlpha, alignment, outsideClick) {
+                    customToastDesign(it)
+                }
+            })
+    }
 }
 
 

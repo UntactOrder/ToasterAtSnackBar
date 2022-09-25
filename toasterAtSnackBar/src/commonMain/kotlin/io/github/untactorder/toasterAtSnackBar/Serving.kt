@@ -23,17 +23,76 @@
 package io.github.untactorder.toasterAtSnackBar
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.AccessibilityManager
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.dismiss
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import kotlinx.coroutines.delay
+
+
+/**
+ * Open AlertDialog by using toast or snackbar.
+ * @param touchBlocking: If enabled, user touches will be blocked while the alert dialog is shown.
+ * @param blockFilterColor: Only works if [touchBlocking] is enabled.
+ * @param maxFilterAlpha: Only works if [touchBlocking] is enabled.
+ * [Warning] This should be used with FloatingSnackBar.
+ */
+@Composable
+fun OpenAlertDialog(
+    isClosed: MutableState<Boolean>,
+    touchBlocking: Boolean = false,
+    blockFilterColor: Color = Color.Transparent,
+    maxFilterAlpha: Float = 0.3f,
+    alignment: Alignment = Alignment.Center,
+    outsideClick: (() -> Unit)? = null,
+    dialog: @Composable () -> Unit
+) {
+    if (touchBlocking) {
+        var currentAlpha by rememberSaveable {
+            mutableStateOf(0f)
+        }
+        LaunchedEffect(key1 = currentAlpha) {
+            if (!isClosed.value) {
+                delay(1)
+                if (currentAlpha < maxFilterAlpha) {
+                    currentAlpha += 0.01f
+                }
+            }
+        }
+        LaunchedEffect(key1 = isClosed.value) {
+            if (isClosed.value) {
+                isClosed.value = false
+                currentAlpha = 0.0f
+            }
+        }
+        val modifier = Modifier.fillMaxSize().background(blockFilterColor.copy(currentAlpha))
+        if (outsideClick is (() -> Unit)) {
+            modifier.clickable {
+                outsideClick()  // TODO: Fix this
+            }
+        }
+        Box(modifier, alignment) {
+            dialog()
+        }
+    } else {
+        dialog()
+    }
+}
+
 
 @Composable
 fun FadeInFadeOutWithScale(
