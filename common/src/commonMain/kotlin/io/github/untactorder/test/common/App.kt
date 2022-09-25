@@ -45,17 +45,13 @@ fun App(modifier: Modifier = Modifier.fillMaxSize()) {
 fun MainScreen2() {
     var textState by rememberSaveable { mutableStateOf("") }
     var boolState by rememberSaveable { mutableStateOf(true) }
+    var isClosed = rememberSaveable { mutableStateOf(false) }
 
     var injector = InjectableSnackBar()
     var injector2 = InjectableSnackBar()
 
-    injector.FloatingSnackBar(
-        snackBarAlignment = Alignment.BottomStart
-    ) {
-        injector2.FloatingSnackBar(
-            snackBarModifier = Modifier.wrapContentSize(),
-            snackBarAlignment = Alignment.Center
-        ) {
+    injector.FloatingSnackBar(snackBarAlignment = Alignment.BottomStart) {
+        injector2.FloatingSnackBar(snackBarAlignment = Alignment.Center) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Center,
@@ -73,7 +69,7 @@ fun MainScreen2() {
                         }
                     )
                 }) {
-                    Text("Sweet Toast Info")
+                    Text("Basic Snackbar")
                 }
 
                 Button(modifier = Modifier.padding(12.dp), onClick = {
@@ -83,11 +79,77 @@ fun MainScreen2() {
                         withDismissAction = false,
                         customToastDesign = { data ->
                             SnackBarToastWithTitle(data, shape = RoundedCornerShape(36.dp),
-                                contentsBoxModifier = Modifier.padding(start = 10.dp, end = 10.dp))
+                                contentsBoxModifier = Modifier.padding(start = 10.dp, end = 10.dp, bottom = 10.dp))
                         }
                     )
                 }) {
-                    Text("Show Toast")
+                    Text("Show Round-Shaped Toast")
+                }
+                val fancyBright = FancyBrightColorSet.toList()
+                val fancyDark = FancyDarkColorSet.toList()
+                Button(modifier = Modifier.padding(12.dp), onClick = {
+                    val index = listOf(0, 1, 2, 3, 4, 5, 6).random()
+                    injector.showSnackbar(
+                        "This is a snackbar for test purpose.",
+                        title = "Fancy Dark",
+                        actionLabel = "Okay",
+                        actionOnNewLine = false,
+                        customToastDesign = { data ->
+                            SnackBarToastWithTitle(data, actionColor = fancyBright[index],
+                                snackBarColorData = SnackBarColorData(
+                                    containerColor = fancyDark[index],
+                                    contentColor = fancyBright[index],
+                                    actionContentColor = fancyBright[index],
+                                    dismissActionContentColor = fancyBright[index]))
+                        }
+                    )
+                }) {
+                    Text("Fancy-Colored Snackbar")
+                }
+
+                Button(modifier = Modifier.padding(12.dp), onClick = {
+                    injector.showSnackbar(
+                        "This is a error notification. Please retry the previous action",
+                        title = "An Error Occurred",
+                        withDismissAction = true,
+                        actionLabel = "Okay",
+                        customToastDesign = { data ->
+                            PastelToast(data, containerColor = PastelColorSet.toList().random())
+                        }
+                    )
+                }) {
+                    Text("Pastel Toast")
+                }
+
+                Button(modifier = Modifier.padding(12.dp), onClick = {
+                    injector.launchAlertDialogWithPastelToast(
+                        "This is a error notification. Please retry the previous action",
+                        title = "An Error Occurred",
+                        withDismissAction = true,
+                        actionLabel = "Okay",
+                        actionOnNewLine = true,
+                        isClosed = isClosed,
+                        touchBlocking = true,
+                        blockFilterColor = Color.Black,
+                        enableOutsideClick = true
+                    )
+                }) {
+                    Text("Pastel AlertDialog")
+                }
+
+                Button(modifier = Modifier.padding(12.dp), onClick = {
+                    boolState = !boolState
+                    injector2.showSnackbar(
+                        "",
+                        title = "An Error Occurred",
+                        withDismissAction = false,
+                        customToastDesign = { data ->
+                            AndroidStyleToast(data, containerColor = FancyColorSet.toList().random(),
+                                contentsBoxModifier = Modifier.padding(6.dp, 0.dp, 4.dp, 0.dp), toastWidth = 250.dp)
+                        }
+                    )
+                }) {
+                    Text("Show Android Toast")
                 }
 
                 Button(modifier = Modifier.padding(12.dp), onClick = {
@@ -97,12 +159,12 @@ fun MainScreen2() {
                         title = "An Error Occurred",
                         withDismissAction = true,
                         customToastDesign = { data ->
-                            IosStypeToast(data, containerColor = if (boolState) Color.Black else Color.White,
-                                modifier = Modifier.width(300.dp).padding(12.dp))
+                            IosStyleToast(data, containerColor = if (boolState) Color.Black else Color.White,
+                                toastWidth = 300.dp)
                         }
                     )
                 }) {
-                    Text("Show IOS Toast")
+                    Text("Show iOS Toast")
                 }
 
                 Button(modifier = Modifier.padding(12.dp), onClick = {
@@ -110,12 +172,11 @@ fun MainScreen2() {
                     injector2.showSnackbar(
                         "Hi there! Welcome to the Toast! Have a nice day!",
                         customToastDesign = { data ->
-                            IosSimpleToast(data, darkBackground = boolState,
-                                modifier = Modifier.width(200.dp).padding(12.dp))
+                            IosSimpleToast(data, darkBackground = boolState, toastWidth = 250.dp)
                         }
                     )
                 }) {
-                    Text("Show IOS Simple Toast")
+                    Text("Show iOS Simple Toast")
                 }
             }
         }

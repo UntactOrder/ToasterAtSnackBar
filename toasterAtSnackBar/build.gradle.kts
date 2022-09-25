@@ -4,7 +4,6 @@ plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
     id("com.android.library")
-    id("dev.icerock.mobile.multiplatform-resources")
 }
 
 kotlin {
@@ -17,8 +16,6 @@ kotlin {
     ).forEach {
         it.binaries.framework {
             baseName = "toasterAtSnackBar"
-            export("dev.icerock.moko:resources:${rootProject.extra["moko_res_version"]}")
-            export("dev.icerock.moko:graphics:0.9.0")  // toUIColor here
         }
     }
 
@@ -35,13 +32,11 @@ kotlin {
                 api(compose.runtime)
                 api(compose.foundation)
                 @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class) api(compose.material3)
-                api("dev.icerock.moko:resources:${rootProject.extra["moko_res_version"]}")
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
-                api("dev.icerock.moko:resources-test:${rootProject.extra["moko_res_version"]}")
             }
         }
         val androidMain by getting {
@@ -51,7 +46,6 @@ kotlin {
                 api("androidx.activity:activity-compose:1.6.0")
                 api("androidx.appcompat:appcompat:1.5.1")
                 api("androidx.core:core-ktx:1.9.0")
-                api("dev.icerock.moko:resources-compose:${rootProject.extra["moko_res_version"]}")
             }
         }
         val androidTest by getting {
@@ -81,7 +75,6 @@ kotlin {
         val desktopMain by getting {
             dependencies {
                 api(compose.preview)
-                api("dev.icerock.moko:resources-compose:${rootProject.extra["moko_res_version"]}")
             }
         }
         val desktopTest by getting
@@ -106,11 +99,7 @@ android {
                 "/META-INF/{AL2.0,LGPL2.1}",
                 "/META-INF/LICENSE*"
             )
-            pickFirsts += "/bundle.properties"  // for kmqtt-client paho java lib
+            pickFirsts += "/bundle.properties"
         }
     }
-}
-
-multiplatformResources {
-    multiplatformResourcesPackage = rootProject.extra["organization"] as String? + ".toasterAtSnackBar"
 }

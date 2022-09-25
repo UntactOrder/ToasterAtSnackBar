@@ -7,11 +7,10 @@ plugins {
 dependencies {
     implementation(project(":common"))
     implementation(project(":toasterAtSnackBar"))
-    api("androidx.activity:activity-compose:1.5.1")
+    api("androidx.activity:activity-compose:1.6.0")
 }
 
 android {
-    namespace = rootProject.extra["organization"] as String? + ".test.toasterAtSnackbar"
     compileSdk = rootProject.extra["android_target_sdk_version"] as Int?
     buildToolsVersion = rootProject.extra["android_build_tool_version"] as String
     testOptions {
@@ -27,7 +26,6 @@ android {
         versionName = rootProject.extra["version"] as String?
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables.useSupportLibrary = true
     }
     sourceSets {
         getByName("main") {

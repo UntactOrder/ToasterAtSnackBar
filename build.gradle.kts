@@ -20,7 +20,7 @@ buildscript {
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${project.extra["kotlin_version"]}")
         classpath("org.jetbrains.kotlin:kotlin-serialization:${project.extra["kotlin_version"]}")
-        classpath("com.android.tools.build:gradle:7.2.2")
+        classpath("com.android.tools.build:gradle:7.3.0")
     }
 }
 
@@ -30,11 +30,6 @@ plugins {
      * https://plugins.gradle.org/plugin/org.jetbrains.compose
      */
     id("org.jetbrains.compose").version("1.2.0-alpha01-dev770").apply(true)
-    /**
-     * Moko Resources
-     * https://github.com/icerockdev/moko-resources
-     */
-    id("dev.icerock.mobile.multiplatform-resources").version("0.20.1").apply(true)
 }
 
 allprojects {
