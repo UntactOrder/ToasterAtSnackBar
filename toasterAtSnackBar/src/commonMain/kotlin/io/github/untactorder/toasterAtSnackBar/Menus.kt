@@ -1,11 +1,3 @@
-package io.github.untactorder.toasterAtSnackBar
-
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 /*
  * Copyright 2021 The Android Open Source Project
  *
@@ -22,12 +14,26 @@ import androidx.compose.foundation.shape.RoundedCornerShape
  * limitations under the License.
  */
 
+/**
+ * This file contains sources from the Android Open Source Project (AOSP)
+ * that are licensed under the Apache License, Version 2.0.
+ *
+ * Modified by @IRACK000
+ */
+
+
+package io.github.untactorder.toasterAtSnackBar
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush.Companion.horizontalGradient
@@ -40,7 +46,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
 
 
 data class SnackBarColorData(

@@ -18,7 +18,10 @@
  * This file contains sources from the Android Open Source Project (AOSP)
  * that are licensed under the Apache License, Version 2.0.
  * @see <a href="URL">https://github.com/JetBrains/androidx/blob/b9c411c51a4d4ea28851c89639a2ef4ae28473cf/compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/SnackbarHost.kt</a>
+ *
+ * Modified by @IRACK000
  */
+
 
 package io.github.untactorder.toasterAtSnackBar
 
@@ -29,10 +32,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
 import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
