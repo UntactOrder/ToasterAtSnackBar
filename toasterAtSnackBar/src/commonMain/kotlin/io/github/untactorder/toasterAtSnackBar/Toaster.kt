@@ -159,7 +159,7 @@ open class InjectableSnackBar(
         customToastDesign: @Composable ((SnackbarData) -> Unit)? = null,
         dismissed: () -> Unit = {}, performed: () -> Unit = {}
     ) {
-        LaunchedEffect(snackbarHostState) {
+        LaunchedEffect(null) {
             showSnackbarInCoroutine(message, title, actionLabel, actionOnNewLine,
                 withDismissAction, duration, customToastDesign, dismissed, performed)
         }
@@ -175,7 +175,7 @@ open class InjectableSnackBar(
         actionOnNewLine: Boolean = false,
         withDismissAction: Boolean = true,
         duration: SnackbarDuration = SnackbarDuration.Indefinite,
-        isClosed: MutableState<Boolean>,
+        isDialOpened: MutableState<Boolean>,
         touchBlocking: Boolean = false,
         blockFilterColor: Color = Color.Transparent,
         maxFilterAlpha: Float = 0.3f,
@@ -184,14 +184,16 @@ open class InjectableSnackBar(
         enableOutsideClick: Boolean = false,
         customToastDesign: @Composable (SnackbarData) -> Unit = {}
     ) {
-        var outsideClick: (() -> Unit)? = null
-        if (enableOutsideClick) {
-            outsideClick = { isClosed.value = true; dismissed() }
-        }
+        isDialOpened.value = true
         showSnackbar(message, title, actionLabel, actionOnNewLine, withDismissAction, duration,
-            dismissed = { isClosed.value = true; dismissed() }, performed = { isClosed.value = true; performed() },
+            dismissed = { isDialOpened.value = false; dismissed() },
+            performed = { isDialOpened.value = false; performed() },
             customToastDesign = {
-                OpenAlertDialog(isClosed, touchBlocking, blockFilterColor, maxFilterAlpha, alignment, outsideClick) {
+                var outsideClick: (() -> Unit)? = null
+                if (enableOutsideClick) {
+                    outsideClick = { it.dismiss() }
+                }
+                OpenAlertDialog(isDialOpened, touchBlocking, blockFilterColor, maxFilterAlpha, alignment, outsideClick) {
                     customToastDesign(it)
                 }
             })

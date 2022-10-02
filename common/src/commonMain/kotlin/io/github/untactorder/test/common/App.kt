@@ -3,11 +3,8 @@ package io.github.untactorder.test.common
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,10 +42,9 @@ fun App(modifier: Modifier = Modifier.fillMaxSize()) {
 fun MainScreen2() {
     var textState by rememberSaveable { mutableStateOf("") }
     var boolState by rememberSaveable { mutableStateOf(true) }
-    var isClosed = rememberSaveable { mutableStateOf(false) }
 
-    var injector = InjectableSnackBar()
-    var injector2 = InjectableSnackBar()
+    val injector = InjectableSnackBar()
+    val injector2 = InjectableSnackBar()
 
     injector.FloatingSnackBar(snackBarAlignment = Alignment.BottomStart) {
         injector2.FloatingSnackBar(snackBarAlignment = Alignment.Center) {
@@ -121,19 +117,28 @@ fun MainScreen2() {
                     Text("Pastel Toast")
                 }
 
-                Button(modifier = Modifier.padding(12.dp), onClick = {
+                val isDialOpened = rememberSaveable { mutableStateOf(false) }
+                val isRestored = remember { mutableStateOf(true) }
+                val dialog = {
                     injector.launchAlertDialogWithPastelToast(
                         "This is a error notification. Please retry the previous action",
                         title = "An Error Occurred",
                         withDismissAction = true,
                         actionLabel = "Okay",
                         actionOnNewLine = true,
-                        isClosed = isClosed,
+                        isDialOpened = isDialOpened,
                         touchBlocking = true,
                         blockFilterColor = Color.Black,
                         enableOutsideClick = true
                     )
-                }) {
+                }
+                if (isRestored.value) {
+                    isRestored.value = false
+                    if (isDialOpened.value) {
+                        LaunchedEffect(null) { dialog() }
+                    }
+                }
+                Button(modifier = Modifier.padding(12.dp), onClick = dialog) {
                     Text("Pastel AlertDialog")
                 }
 

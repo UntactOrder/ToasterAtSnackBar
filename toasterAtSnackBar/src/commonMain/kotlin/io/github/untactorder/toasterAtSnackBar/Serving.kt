@@ -25,11 +25,14 @@ package io.github.untactorder.toasterAtSnackBar
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Button
 import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -49,14 +52,16 @@ import kotlinx.coroutines.delay
  * @param touchBlocking: If enabled, user touches will be blocked while the alert dialog is shown.
  * @param blockFilterColor: Only works if [touchBlocking] is enabled.
  * @param maxFilterAlpha: Only works if [touchBlocking] is enabled.
+ * @param alignment: Only works if [touchBlocking] is enabled.
+ * @param outsideClick: Only works if [touchBlocking] is enabled.
  * [Warning] This should be used with FloatingSnackBar.
  */
 @Composable
 fun OpenAlertDialog(
-    isClosed: MutableState<Boolean>,
+    isDialOpened: MutableState<Boolean>,
     touchBlocking: Boolean = false,
     blockFilterColor: Color = Color.Transparent,
-    maxFilterAlpha: Float = 0.3f,
+    maxFilterAlpha: Float = 0.2f,
     alignment: Alignment = Alignment.Center,
     outsideClick: (() -> Unit)? = null,
     dialog: @Composable () -> Unit
@@ -66,24 +71,21 @@ fun OpenAlertDialog(
             mutableStateOf(0f)
         }
         LaunchedEffect(key1 = currentAlpha) {
-            if (!isClosed.value) {
+            if (isDialOpened.value) {
                 delay(1)
                 if (currentAlpha < maxFilterAlpha) {
                     currentAlpha += 0.01f
                 }
             }
         }
-        LaunchedEffect(key1 = isClosed.value) {
-            if (isClosed.value) {
-                isClosed.value = false
+        LaunchedEffect(key1 = isDialOpened.value) {
+            if (!isDialOpened.value) {
                 currentAlpha = 0.0f
             }
         }
-        val modifier = Modifier.fillMaxSize().background(blockFilterColor.copy(currentAlpha))
+        var modifier = Modifier.fillMaxSize().background(blockFilterColor.copy(currentAlpha))
         if (outsideClick is (() -> Unit)) {
-            modifier.clickable {
-                outsideClick()  // TODO: Fix this
-            }
+            modifier = modifier.clickable(MutableInteractionSource(), null) { outsideClick() }
         }
         Box(modifier, alignment) {
             dialog()

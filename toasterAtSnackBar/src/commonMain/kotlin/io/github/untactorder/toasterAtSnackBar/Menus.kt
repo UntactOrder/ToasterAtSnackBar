@@ -591,7 +591,7 @@ fun InjectableSnackBar.launchAlertDialogWithPastelToast(
     actionOnNewLine: Boolean = false,
     withDismissAction: Boolean = true,
     duration: SnackbarDuration = SnackbarDuration.Indefinite,
-    isClosed: MutableState<Boolean>,
+    isDialOpened: MutableState<Boolean>,
     touchBlocking: Boolean = false,
     blockFilterColor: Color = Color.Transparent,
     maxFilterAlpha: Float = 0.3f,
@@ -603,6 +603,6 @@ fun InjectableSnackBar.launchAlertDialogWithPastelToast(
             containerColor = PastelColorSet.toList().random())
     }
 ) {
-    launchAlertDialog(message, title, actionLabel, actionOnNewLine, withDismissAction, duration, isClosed, touchBlocking,
+    launchAlertDialog(message, title, actionLabel, actionOnNewLine, withDismissAction, duration, isDialOpened, touchBlocking,
         blockFilterColor, maxFilterAlpha, alignment, dismissed, performed, enableOutsideClick, customToastDesign)
 }
