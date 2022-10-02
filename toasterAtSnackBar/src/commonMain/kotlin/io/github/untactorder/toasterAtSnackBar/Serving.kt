@@ -17,9 +17,21 @@
 /**
  * This file contains sources from the Android Open Source Project (AOSP)
  * that are licensed under the Apache License, Version 2.0.
- * @see <a href="URL">https://github.com/JetBrains/androidx/blob/b9c411c51a4d4ea28851c89639a2ef4ae28473cf/compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/SnackbarHost.kt</a>
+ *
  *
  * Modified by @IRACK000
+ * @source androidx.compose.material3.SnackbarHost.SnackbarHost
+ * @see <a href="URL">https://github.com/JetBrains/androidx/blob/b9c411c51a4d4ea28851c89639a2ef4ae28473cf/compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/SnackbarHost.kt</a>
+ *
+ * FadeInFadeOutWithScale:
+ * This has not been modified in the original code, and the scope has been changed from private to public
+ *
+ * FadeInFadeOutState, FadeInFadeOutAnimationItem, FadeInFadeOutTransition, animatedOpacity, animatedScale,
+ *  SnackbarInBetweenDelayMillis, SnackbarFadeOutMillis, SnackbarFadeInMillis:
+ * It was only copied and pasted to access the private elements. There are no amendments.
+ *
+ * SnackbarDuration.toMillis:
+ * This has not been modified in the original code, and the scope has been changed from private to public
  */
 
 

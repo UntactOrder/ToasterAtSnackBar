@@ -18,7 +18,19 @@
  * This file contains sources from the Android Open Source Project (AOSP)
  * that are licensed under the Apache License, Version 2.0.
  *
+ *
  * Modified by @IRACK000
+ *
+ * Bartender:
+ * @source androidx.compose.material3.SnackbarHost.SnackbarHost
+ * Referred to SnackbarHost when creating Bartender.
+ * Change so that lib user can specify animations & design of the snack bar.
+ * Support BillLetterVisual class as internal data type.
+ *
+ * BillLetterVisual:
+ * @source androidx.compose.material3.SnackbarHost.SnackbarHostState
+ * Referred to private class SnackbarVisualsImpl when creating BillLetterVisual.
+ * Several variables were added and existing variables were also overridden as var.
  */
 
 

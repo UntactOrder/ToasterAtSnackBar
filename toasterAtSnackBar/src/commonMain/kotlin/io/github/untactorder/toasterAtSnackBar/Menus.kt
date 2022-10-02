@@ -18,7 +18,14 @@
  * This file contains sources from the Android Open Source Project (AOSP)
  * that are licensed under the Apache License, Version 2.0.
  *
+ *
  * Modified by @IRACK000
+ *
+ * The two functions defaultActionComposable and defaultDismissActionComposable are based on the source code
+ *  extracted from the androidx.compose.material3.Snackbar.Snackbar(sackbarData, modifier, actionOnNewLine, shape,
+ *                                                                  containerColor, contentColor, actionColor,
+ *                                                                  actionContentColor, dismissActionContentColor)
+ *  function.
  */
 
 
