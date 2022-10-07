@@ -7,6 +7,9 @@ plugins {
     id("maven-publish")
 }
 
+group = "io.github.untactorder"
+version = "1.0.0"
+
 kotlin {
     android()
 
