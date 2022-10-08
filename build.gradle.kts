@@ -47,6 +47,10 @@ plugins {
      * Sonatype Nexus Publish Plugin
      */
     id("io.github.gradle-nexus.publish-plugin").version("1.1.0").apply(true)
+    /**
+     * Dokka Gradle Plugin
+     */
+    id("org.jetbrains.dokka").version("1.7.10").apply(true)
 }
 
 nexusPublishing {
