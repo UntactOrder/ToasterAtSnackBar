@@ -1,4 +1,5 @@
 import org.jetbrains.compose.compose
+import org.jetbrains.dokka.gradle.DokkaTask
 
 group = project.properties["lib.organization"]!!
 version = rootProject.properties["lib.version"]!!
@@ -8,7 +9,55 @@ plugins {
     id("org.jetbrains.compose")
     id("com.android.library")
     id("maven-publish")
+    id("org.jetbrains.dokka").version("1.7.10")
     id("signing")
+}
+
+val dokkaHtml by tasks.getting(DokkaTask::class)
+
+val javadocJar by tasks.registering(Jar::class) {
+    dependsOn(dokkaHtml)
+    archiveClassifier.set("javadoc")
+    from(dokkaHtml.outputDirectory)
+}
+
+val dokkaJar by tasks.creating(Jar::class.java) {
+    archiveClassifier.set("javadoc")
+    from(tasks.dokkaHtml)
+}
+
+afterEvaluate {
+    publishing {
+        publications.withType<MavenPublication> {
+            artifact(javadocJar)
+            groupId = rootProject.extra["lib.organization"] as String
+            version = rootProject.extra["lib.version"] as String
+            artifactId = "toasterAtSnackBar"
+
+            pom {
+                name.set("ToasterAtSnackBar")
+                description.set("Toast and SnackBar Lib contains design presets for Kotlin Multi-platform written with Compose.")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("UntactOrder")
+                        name.set("UntactOrder Developers")
+                        email.set("untactorder@gmail.com")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:github.com/UntactOrder/ToasterAtSnackBar.git")
+                    developerConnection.set("scm:git:ssh://github.com/UntactOrder/ToasterAtSnackBar.git")
+                    url.set("https://github.com/UntactOrder/ToasterAtSnackBar/tree/main")
+                }
+            }
+        }
+    }
 }
 
 signing {
@@ -92,42 +141,6 @@ kotlin {
             }
         }
         val desktopTest by getting
-    }
-
-    publishing {
-        val kotlinSourcesJar by tasks.register("kotlinSourcesJar", Jar::class) {
-            archiveClassifier.set("sources")
-            from(sourceSets.getByName("commonMain").kotlin.srcDirs)
-        }
-        publications.withType<MavenPublication> {
-            artifact(kotlinSourcesJar)
-            groupId = rootProject.extra["lib.organization"] as String
-            version = rootProject.extra["lib.version"] as String
-            artifactId = "toasterAtSnackBar"
-
-            pom {
-                name.set("ToasterAtSnackBar")
-                description.set("Toast and SnackBar Lib contains design presets for Kotlin Multi-platform written with Compose.")
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("UntactOrder")
-                        name.set("UntactOrder Developers")
-                        email.set("untactorder@gmail.com")
-                    }
-                }
-                scm {
-                    connection.set("scm:git:github.com/UntactOrder/ToasterAtSnackBar.git")
-                    developerConnection.set("scm:git:ssh://github.com/UntactOrder/ToasterAtSnackBar.git")
-                    url.set("https://github.com/UntactOrder/ToasterAtSnackBar/tree/main")
-                }
-            }
-        }
     }
 }
 
