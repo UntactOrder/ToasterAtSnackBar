@@ -1,14 +1,24 @@
 import org.jetbrains.compose.compose
 
+group = project.properties["lib.organization"]!!
+version = rootProject.properties["lib.version"]!!
+
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.compose")
     id("com.android.library")
     id("maven-publish")
+    id("signing")
 }
 
-group = "io.github.untactorder"
-version = "1.0.0"
+signing {
+    useInMemoryPgpKeys(
+        rootProject.extra["signing_key_id"] as String,
+        rootProject.extra["signing_secret_key"] as String,
+        rootProject.extra["signing_password"] as String
+    )
+    sign(publishing.publications)
+}
 
 kotlin {
     android()
@@ -82,6 +92,42 @@ kotlin {
             }
         }
         val desktopTest by getting
+    }
+
+    publishing {
+        val kotlinSourcesJar by tasks.register("kotlinSourcesJar", Jar::class) {
+            archiveClassifier.set("sources")
+            from(sourceSets.getByName("commonMain").kotlin.srcDirs)
+        }
+        publications.withType<MavenPublication> {
+            artifact(kotlinSourcesJar)
+            groupId = rootProject.extra["lib.organization"] as String
+            version = rootProject.extra["lib.version"] as String
+            artifactId = "toasterAtSnackBar"
+
+            pom {
+                name.set("ToasterAtSnackBar")
+                description.set("Toast and SnackBar Lib contains design presets for Kotlin Multi-platform written with Compose.")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("UntactOrder")
+                        name.set("UntactOrder Developers")
+                        email.set("untactorder@gmail.com")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:github.com/UntactOrder/ToasterAtSnackBar.git")
+                    developerConnection.set("scm:git:ssh://github.com/UntactOrder/ToasterAtSnackBar.git")
+                    url.set("https://github.com/UntactOrder/ToasterAtSnackBar/tree/main")
+                }
+            }
+        }
     }
 }
 

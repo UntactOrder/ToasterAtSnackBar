@@ -29,6 +29,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":toasterAtSnackBar"))
+                //implementation("io.github.untactorder:toasterAtSnackBar:1.0.0")
                 api(compose.ui)
                 api(compose.runtime)
                 api(compose.foundation)

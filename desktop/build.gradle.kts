@@ -20,7 +20,6 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(project(":common"))
-                implementation(project(":toasterAtSnackBar"))
                 implementation(compose.desktop.currentOs)
             }
         }

@@ -6,7 +6,6 @@ plugins {
 
 dependencies {
     implementation(project(":common"))
-    implementation(project(":toasterAtSnackBar"))
     api("androidx.activity:activity-compose:1.6.0")
 }
 
