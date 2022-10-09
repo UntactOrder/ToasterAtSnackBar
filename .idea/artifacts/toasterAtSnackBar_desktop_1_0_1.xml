@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="toasterAtSnackBar-desktop-1.0.1">
+    <output-path>$PROJECT_DIR$/toasterAtSnackBar/build/libs</output-path>
+    <root id="archive" name="toasterAtSnackBar-desktop-1.0.1.jar">
+      <element id="module-output" name="ToasterAtSnackBar.toasterAtSnackBar.desktopMain" />
+    </root>
+  </artifact>
+</component>
