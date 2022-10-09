@@ -214,7 +214,7 @@ open class InjectableSnackBar(
         isDialOpened: MutableState<Boolean>,
         touchBlocking: Boolean = false,
         blockFilterColor: Color = Color.Transparent,
-        maxFilterAlpha: Float = 0.3f,
+        maxFilterAlpha: Float = 0.2f,
         alignment: Alignment = Alignment.Center,
         dismissed: () -> Unit = {}, performed: () -> Unit = {},
         enableOutsideClick: Boolean = false,

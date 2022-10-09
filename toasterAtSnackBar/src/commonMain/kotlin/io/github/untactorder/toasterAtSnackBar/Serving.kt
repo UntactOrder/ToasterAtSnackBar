@@ -74,7 +74,7 @@ fun OpenAlertDialog(
     isDialOpened: MutableState<Boolean>,
     touchBlocking: Boolean = false,
     blockFilterColor: Color = Color.Transparent,
-    maxFilterAlpha: Float = 0.3f,
+    maxFilterAlpha: Float = 0.2f,
     alignment: Alignment = Alignment.Center,
     outsideClick: (() -> Unit)? = null,
     dialog: @Composable () -> Unit
@@ -86,7 +86,7 @@ fun OpenAlertDialog(
         LaunchedEffect(key1 = currentAlpha) {
             if (isDialOpened.value) {
                 if (currentAlpha < maxFilterAlpha) {
-                    currentAlpha += 0.005f
+                    currentAlpha += 0.008f
                 }
             }
         }
