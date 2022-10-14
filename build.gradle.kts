@@ -2,15 +2,6 @@ buildscript {
     val localProp = java.util.Properties()
     localProp.load(file("local.properties").inputStream())
 
-    extra["kotlin_version"] = "1.7.10"
-    extra["ktor_version"] = "2.0.3"
-    extra["junit_version"] = "5.9.0"
-    extra["compose_ext_version"] = "1.3.0-beta01"
-    extra["moko_res_version"] = "0.20.1"
-    extra["android_target_sdk_version"] = 33
-    extra["android_min_sdk_version"] = 24
-    extra["android_build_tool_version"] = "33.0.0"
-
     extra["organization"] = project.properties["lib.organization"]
     extra["version"] = project.properties["lib.version"]
 
@@ -26,31 +17,19 @@ buildscript {
         mavenCentral()
         google()
     }
-
-    dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${project.extra["kotlin_version"]}")
-        classpath("org.jetbrains.kotlin:kotlin-serialization:${project.extra["kotlin_version"]}")
-        classpath("com.android.tools.build:gradle:7.3.0")
-    }
 }
 
 group = project.properties["lib.organization"]!!
 version = project.properties["lib.version"]!!
 
 plugins {
-    /**
-     * Compose Gradle Plugin
-     * https://plugins.gradle.org/plugin/org.jetbrains.compose
-     */
-    id("org.jetbrains.compose").version("1.2.0-alpha01-dev770").apply(true)
-    /**
-     * Sonatype Nexus Publish Plugin
-     */
-    id("io.github.gradle-nexus.publish-plugin").version("1.1.0").apply(true)
-    /**
-     * Dokka Gradle Plugin
-     */
-    id("org.jetbrains.dokka").version("1.7.10").apply(true)
+    kotlin("multiplatform").apply(false)
+    kotlin("android").apply(false)
+    id("com.android.application").apply(false)
+    id("com.android.library").apply(false)
+    id("org.jetbrains.compose").apply(false)
+    id("org.jetbrains.dokka").apply(false)
+    id("io.github.gradle-nexus.publish-plugin").apply(true)
 }
 
 nexusPublishing {

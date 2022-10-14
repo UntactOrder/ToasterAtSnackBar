@@ -6,12 +6,16 @@ plugins {
 
 dependencies {
     implementation(project(":common"))
+    api("androidx.compose.ui:ui-tooling-preview:1.3.0-rc01")
+    api("androidx.compose.material3:material3:1.0.0-rc01")
     api("androidx.activity:activity-compose:1.6.0")
+    api("androidx.appcompat:appcompat:1.5.1")
+    api("androidx.core:core-ktx:1.9.0")
 }
 
 android {
-    compileSdk = rootProject.extra["android_target_sdk_version"] as Int?
-    buildToolsVersion = rootProject.extra["android_build_tool_version"] as String
+    compileSdk = (rootProject.extra["android.sdk.target.version"] as String).toInt()
+    buildToolsVersion = rootProject.extra["android.build_tool.version"] as String
     testOptions {
         unitTests.apply {
             isReturnDefaultValues = true
@@ -19,8 +23,8 @@ android {
     }
     defaultConfig {
         applicationId = rootProject.extra["organization"] as String? + ".test.toasterAtSnackbar"
-        minSdk = rootProject.extra["android_min_sdk_version"] as Int?
-        targetSdk = rootProject.extra["android_target_sdk_version"] as Int?
+        minSdk = (rootProject.extra["android.sdk.min.version"] as String).toInt()
+        targetSdk = (rootProject.extra["android.sdk.target.version"] as String).toInt()
         versionCode = 1
         versionName = rootProject.extra["version"] as String?
 
@@ -50,7 +54,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = rootProject.extra["compose_ext_version"] as String
+        kotlinCompilerExtensionVersion = rootProject.extra["compose.ext.version"] as String
     }
     packagingOptions {
         resources {

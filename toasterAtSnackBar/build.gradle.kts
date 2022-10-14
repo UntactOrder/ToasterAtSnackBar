@@ -26,39 +26,6 @@ val dokkaJar by tasks.creating(Jar::class.java) {
     from(tasks.dokkaHtml)
 }
 
-publishing {
-    publications.withType<MavenPublication> {
-        artifact(javadocJar)
-        groupId = rootProject.extra["lib.organization"] as String
-        version = rootProject.extra["lib.version"] as String
-        artifactId = "toasterAtSnackBar"
-
-        pom {
-            name.set("ToasterAtSnackBar")
-            description.set("Toast and SnackBar Lib contains design presets for Kotlin Multi-platform written with Compose.")
-            url.set("https://github.com/UntactOrder/ToasterAtSnackBar/tree/main")
-            licenses {
-                license {
-                    name.set("The Apache License, Version 2.0")
-                    url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                }
-            }
-            developers {
-                developer {
-                    id.set("UntactOrder")
-                    name.set("UntactOrder Developers")
-                    email.set("untactorder@gmail.com")
-                }
-            }
-            scm {
-                connection.set("scm:git:github.com/UntactOrder/ToasterAtSnackBar.git")
-                developerConnection.set("scm:git:ssh://github.com/UntactOrder/ToasterAtSnackBar.git")
-                url.set("https://github.com/UntactOrder/ToasterAtSnackBar/tree/main")
-            }
-        }
-    }
-}
-
 signing {
     useInMemoryPgpKeys(
         rootProject.extra["signing_key_id"] as String,
@@ -103,7 +70,7 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                api("androidx.compose.ui:ui-tooling-preview:${rootProject.extra["compose_ext_version"]}")
+                api("androidx.compose.ui:ui-tooling-preview:1.3.0-rc01")
                 api("androidx.compose.material3:material3:1.0.0-rc01")
                 api("androidx.activity:activity-compose:1.6.0")
                 api("androidx.appcompat:appcompat:1.5.1")
@@ -141,15 +108,48 @@ kotlin {
         }
         val desktopTest by getting
     }
+
+    publishing {
+        publications.withType<MavenPublication> {
+            artifact(javadocJar)
+            groupId = rootProject.extra["lib.organization"] as String
+            version = rootProject.extra["lib.version"] as String
+            artifactId = "toasterAtSnackBar"
+
+            pom {
+                name.set("ToasterAtSnackBar")
+                description.set("Toast and SnackBar Lib contains design presets for Kotlin Multi-platform written with Compose.")
+                url.set("https://github.com/UntactOrder/ToasterAtSnackBar/tree/main")
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("UntactOrder")
+                        name.set("UntactOrder Developers")
+                        email.set("untactorder@gmail.com")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:github.com/UntactOrder/ToasterAtSnackBar.git")
+                    developerConnection.set("scm:git:ssh://github.com/UntactOrder/ToasterAtSnackBar.git")
+                    url.set("https://github.com/UntactOrder/ToasterAtSnackBar/tree/main")
+                }
+            }
+        }
+    }
 }
 
 android {
-    compileSdk = rootProject.extra["android_target_sdk_version"] as Int?
-    buildToolsVersion = rootProject.extra["android_build_tool_version"] as String
+    compileSdk = (rootProject.extra["android.sdk.target.version"] as String).toInt()
+    buildToolsVersion = rootProject.extra["android.build_tool.version"] as String
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
-        minSdk = rootProject.extra["android_min_sdk_version"] as Int?
-        targetSdk = rootProject.extra["android_target_sdk_version"] as Int?
+        minSdk = (rootProject.extra["android.sdk.min.version"] as String).toInt()
+        targetSdk = (rootProject.extra["android.sdk.target.version"] as String).toInt()
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -159,7 +159,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = rootProject.extra["compose_ext_version"] as String
+        kotlinCompilerExtensionVersion = rootProject.extra["compose.ext.version"] as String
     }
     packagingOptions {
         resources {
