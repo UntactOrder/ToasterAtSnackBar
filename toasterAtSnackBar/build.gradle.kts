@@ -21,9 +21,42 @@ val javadocJar by tasks.registering(Jar::class) {
     from(dokkaHtml.outputDirectory)
 }
 
-val dokkaJar by tasks.creating(Jar::class.java) {
+val dokkaJar by tasks.creating(Jar::class) {
     archiveClassifier.set("javadoc")
     from(tasks.dokkaHtml)
+}
+
+publishing {
+    publications.withType<MavenPublication>().configureEach {
+        artifact(javadocJar)
+        groupId = rootProject.extra["lib.organization"] as String
+        version = rootProject.extra["lib.version"] as String
+        artifactId = "toasterAtSnackBar"
+
+        pom {
+            name.set("ToasterAtSnackBar")
+            description.set("Toast and SnackBar Lib contains design presets for Kotlin Multi-platform written with Compose.")
+            url.set("https://github.com/UntactOrder/ToasterAtSnackBar/tree/main")
+            licenses {
+                license {
+                    name.set("The Apache License, Version 2.0")
+                    url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                }
+            }
+            developers {
+                developer {
+                    id.set("UntactOrder")
+                    name.set("UntactOrder Developers")
+                    email.set("untactorder@gmail.com")
+                }
+            }
+            scm {
+                connection.set("scm:git:github.com/UntactOrder/ToasterAtSnackBar.git")
+                developerConnection.set("scm:git:ssh://github.com/UntactOrder/ToasterAtSnackBar.git")
+                url.set("https://github.com/UntactOrder/ToasterAtSnackBar/tree/main")
+            }
+        }
+    }
 }
 
 signing {
@@ -36,7 +69,9 @@ signing {
 }
 
 kotlin {
-    android()
+    android {
+        publishLibraryVariants("release", "debug")
+    }
 
     listOf(
         iosX64(),
@@ -107,39 +142,6 @@ kotlin {
             }
         }
         val desktopTest by getting
-    }
-
-    publishing {
-        publications.withType<MavenPublication> {
-            artifact(javadocJar)
-            groupId = rootProject.extra["lib.organization"] as String
-            version = rootProject.extra["lib.version"] as String
-            artifactId = "toasterAtSnackBar"
-
-            pom {
-                name.set("ToasterAtSnackBar")
-                description.set("Toast and SnackBar Lib contains design presets for Kotlin Multi-platform written with Compose.")
-                url.set("https://github.com/UntactOrder/ToasterAtSnackBar/tree/main")
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("UntactOrder")
-                        name.set("UntactOrder Developers")
-                        email.set("untactorder@gmail.com")
-                    }
-                }
-                scm {
-                    connection.set("scm:git:github.com/UntactOrder/ToasterAtSnackBar.git")
-                    developerConnection.set("scm:git:ssh://github.com/UntactOrder/ToasterAtSnackBar.git")
-                    url.set("https://github.com/UntactOrder/ToasterAtSnackBar/tree/main")
-                }
-            }
-        }
     }
 }
 
