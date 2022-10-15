@@ -1,4 +1,3 @@
-import org.jetbrains.compose.compose
 import org.jetbrains.dokka.gradle.DokkaTask
 
 group = project.properties["lib.organization"]!!
