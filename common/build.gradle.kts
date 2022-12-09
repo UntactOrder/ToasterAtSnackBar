@@ -26,8 +26,8 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                //implementation(project(":toasterAtSnackBar"))
-                implementation("io.github.untactorder:toasterAtSnackBar:1.0.2")
+                implementation(project(":toasterAtSnackBar"))
+                //implementation("io.github.untactorder:toasterAtSnackBar:1.0.2")
                 api(compose.ui)
                 api(compose.runtime)
                 api(compose.foundation)
@@ -41,16 +41,16 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                api("androidx.compose.ui:ui-tooling-preview:1.3.0-rc01")
-                api("androidx.compose.material3:material3:1.0.0-rc01")
-                api("androidx.activity:activity-compose:1.6.0")
+                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class) api(compose.material3)
+                api(compose.preview)
+                api("androidx.activity:activity-compose:1.6.1")
                 api("androidx.appcompat:appcompat:1.5.1")
                 api("androidx.core:core-ktx:1.9.0")
             }
         }
         val androidTest by getting {
             dependencies {
-                implementation("androidx.test.ext:junit-ktx:1.1.3")
+                implementation("androidx.test.ext:junit-ktx:1.1.4")
                 implementation("junit:junit:4.13.2")
             }
         }
@@ -58,6 +58,9 @@ kotlin {
         val iosArm64Main by getting
         val iosSimulatorArm64Main by getting
         val iosMain by creating {
+            dependencies {
+                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class) api(compose.material3)
+            }
             dependsOn(commonMain)
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
@@ -74,6 +77,7 @@ kotlin {
         }
         val desktopMain by getting {
             dependencies {
+                @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class) api(compose.material3)
                 api(compose.preview)
             }
         }

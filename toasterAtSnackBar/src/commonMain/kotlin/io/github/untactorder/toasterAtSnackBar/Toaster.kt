@@ -39,6 +39,7 @@ package io.github.untactorder.toasterAtSnackBar
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,16 +53,26 @@ import kotlinx.coroutines.launch
 
 open class InjectableSnackBar(
     snackbarHostState: SnackbarHostState? = null,
-    lifecycleScope: CoroutineScope? = null,
+    lifecycleScope: CoroutineScope? = null
 ) {
     private lateinit var snackbarHostState: SnackbarHostState
     private lateinit var lifecycleScope: CoroutineScope
+
+    private lateinit var snackBarAlignment: MutableState<Alignment>
+    private lateinit var isAnimating: MutableState<Boolean>
 
     val hostState: SnackbarHostState
         @Composable
         get() {
             this.issueState()
             return snackbarHostState
+        }
+
+    val changeAlignment: (Alignment) -> Unit
+        @Composable
+        get() {
+            this.issueState()
+            return { snackBarAlignment.value = it }
         }
 
     init {
@@ -81,6 +92,10 @@ open class InjectableSnackBar(
         if (!this::lifecycleScope.isInitialized) {
             this.lifecycleScope = rememberCoroutineScope()
         }
+        if (!this::snackBarAlignment.isInitialized) {
+            this.snackBarAlignment = remember { mutableStateOf(Alignment.BottomStart) }
+            this.isAnimating = remember { mutableStateOf(false) }
+        }
     }
 
     /**
@@ -89,7 +104,8 @@ open class InjectableSnackBar(
     @Composable
     fun EmbeddedSnackBar(
         snackBarModifier: Modifier = Modifier.wrapContentSize(),
-        snackbarHost: @Composable (SnackbarHostState) -> Unit = { Bartender(it) }
+        snackbarHost: @Composable (SnackbarHostState, MutableState<Alignment>, MutableState<Boolean>) -> Unit
+        = { state, align, ani -> Bartender(state, snackBarAlignment = align, isAnimating = ani) },
     ) {
         issueState()  // state have to be issued before using
 
@@ -101,7 +117,7 @@ open class InjectableSnackBar(
                 }
 
                 val snackbarPlaceables = subcompose(1) {
-                    snackbarHost(snackbarHostState)
+                    snackbarHost(snackbarHostState, snackBarAlignment, isAnimating)
                 }.map {
                     it.measure(looseConstraints)
                 }
@@ -131,13 +147,17 @@ open class InjectableSnackBar(
     fun FloatingSnackBar(
         boxModifier: Modifier = Modifier.fillMaxSize(),
         snackBarModifier: Modifier = Modifier.wrapContentSize(),
-        snackBarAlignment: Alignment = Alignment.BottomStart,
-        snackbarHost: @Composable (SnackbarHostState) -> Unit = { Bartender(it) },
+        snackbarHost: @Composable (SnackbarHostState, MutableState<Alignment>, MutableState<Boolean>) -> Unit
+        = { state, align, ani -> Bartender(state, snackBarAlignment = align, isAnimating = ani) },
         content: @Composable () -> Unit = {}
     ) {
-        Box(boxModifier) {
+        issueState()  // states have to be issued before using
+        Box(
+            boxModifier,
+            contentAlignment = snackBarAlignment.value
+        ) {
             content()
-            EmbeddedSnackBar(snackBarModifier.align(snackBarAlignment), snackbarHost)
+            EmbeddedSnackBar(snackBarModifier, snackbarHost)
         }
     }
 
@@ -149,12 +169,13 @@ open class InjectableSnackBar(
         actionOnNewLine: Boolean = false,
         withDismissAction: Boolean = true,
         duration: SnackbarDuration = SnackbarDuration.Short,
+        snackBarAlignment: Alignment = Alignment.BottomStart,
         customToastDesign: @Composable ((SnackbarData) -> Unit)? = null,
         dismissed: () -> Unit = {}, performed: () -> Unit = {}
     ) {
         when (snackbarHostState.showSnackbar(
             BillLetterVisual(message, title, actionLabel, actionOnNewLine,
-                withDismissAction, duration, customToastDesign)
+                withDismissAction, duration, snackBarAlignment, customToastDesign)
         )) {
             SnackbarResult.Dismissed -> dismissed()
             SnackbarResult.ActionPerformed -> performed()
@@ -172,12 +193,13 @@ open class InjectableSnackBar(
         actionOnNewLine: Boolean = false,
         withDismissAction: Boolean = true,
         duration: SnackbarDuration = SnackbarDuration.Short,
+        snackBarAlignment: Alignment = Alignment.BottomStart,
         customToastDesign: @Composable ((SnackbarData) -> Unit)? = null,
         dismissed: () -> Unit = {}, performed: () -> Unit = {}
     ) {
         lifecycleScope.launch {
             showSnackbarInCoroutine(message, title, actionLabel, actionOnNewLine,
-                withDismissAction, duration, customToastDesign, dismissed, performed)
+                withDismissAction, duration, snackBarAlignment, customToastDesign, dismissed, performed)
         }
     }
 
@@ -192,12 +214,13 @@ open class InjectableSnackBar(
         actionOnNewLine: Boolean = false,
         withDismissAction: Boolean = true,
         duration: SnackbarDuration = SnackbarDuration.Short,
+        snackBarAlignment: Alignment = Alignment.BottomStart,
         customToastDesign: @Composable ((SnackbarData) -> Unit)? = null,
         dismissed: () -> Unit = {}, performed: () -> Unit = {}
     ) {
         LaunchedEffect(null) {
             showSnackbarInCoroutine(message, title, actionLabel, actionOnNewLine,
-                withDismissAction, duration, customToastDesign, dismissed, performed)
+                withDismissAction, duration, snackBarAlignment, customToastDesign, dismissed, performed)
         }
     }
 
@@ -215,13 +238,13 @@ open class InjectableSnackBar(
         touchBlocking: Boolean = false,
         blockFilterColor: Color = Color.Transparent,
         maxFilterAlpha: Float = 0.2f,
-        alignment: Alignment = Alignment.Center,
+        snackBarAlignment: Alignment = Alignment.Center,
         dismissed: () -> Unit = {}, performed: () -> Unit = {},
         enableOutsideClick: Boolean = false,
         customToastDesign: @Composable (SnackbarData) -> Unit = {}
     ) {
         isDialOpened.value = true
-        showSnackbar(message, title, actionLabel, actionOnNewLine, withDismissAction, duration,
+        showSnackbar(message, title, actionLabel, actionOnNewLine, withDismissAction, duration, snackBarAlignment,
             dismissed = { isDialOpened.value = false; dismissed() },
             performed = { isDialOpened.value = false; performed() },
             customToastDesign = {
@@ -229,7 +252,7 @@ open class InjectableSnackBar(
                 if (enableOutsideClick) {
                     outsideClick = { it.dismiss() }
                 }
-                OpenAlertDialog(isDialOpened, touchBlocking, blockFilterColor, maxFilterAlpha, alignment, outsideClick) {
+                OpenAlertDialog(isDialOpened, touchBlocking, blockFilterColor, maxFilterAlpha, snackBarAlignment, outsideClick) {
                     customToastDesign(it)
                 }
             })
@@ -241,13 +264,17 @@ open class InjectableSnackBar(
 fun Bartender(
     hostState: SnackbarHostState,
     modifier: Modifier = Modifier,
+    snackBarAlignment: MutableState<Alignment>,
+    isAnimating: MutableState<Boolean>,
     customAnimation: (@Composable (
         current: SnackbarData?,
         modifier: Modifier,
+        onAnimationFinished: (Boolean) -> Unit,
         content: @Composable ((SnackbarData) -> Unit)
     ) -> Unit)? = null
 ) {
     val currentSnackbarData = hostState.currentSnackbarData
+    val details = currentSnackbarData?.visuals
     val accessibilityManager = LocalAccessibilityManager.current
     LaunchedEffect(currentSnackbarData) {
         if (currentSnackbarData != null) {
@@ -259,10 +286,20 @@ fun Bartender(
             currentSnackbarData.dismiss()
         }
     }
+    val started = @Composable {
+        LaunchedEffect(isAnimating.value) {
+            if (!isAnimating.value) {
+                if (details is BillLetterVisual) {
+                    snackBarAlignment.value = details.snackBarAlignment
+                }
+                isAnimating.value = true
+            }
+        }
+    }
     val snackbarWidget = @Composable { data: SnackbarData ->
-        val details = data.visuals
-        if (details is BillLetterVisual) {
-            val customToastDesign = details.customToastDesign
+        val visuals = data.visuals
+        if (visuals is BillLetterVisual) {
+            val customToastDesign = visuals.customToastDesign
             if (customToastDesign is @Composable ((SnackbarData) -> Unit)) {
                 customToastDesign(data)
             } else {
@@ -272,10 +309,16 @@ fun Bartender(
             SnackBarToast(data)
         }
     }
+    val finished: (Boolean) -> Unit = { isVisible ->
+        if (!isVisible) {
+            isAnimating.value = false
+        }
+    }
     if (customAnimation == null) {
-        FadeInFadeOutWithScale(hostState.currentSnackbarData, modifier, snackbarWidget)
+        FadeInFadeOutWithScale(hostState.currentSnackbarData, modifier,
+            onAnimationStarted = started, onAnimationFinished = finished, content = snackbarWidget)
     } else {
-        customAnimation(hostState.currentSnackbarData, modifier, snackbarWidget)
+        customAnimation(hostState.currentSnackbarData, modifier, finished, snackbarWidget)
     }
 }
 
@@ -287,6 +330,7 @@ open class BillLetterVisual(
     var actionOnNewLine: Boolean,
     override var withDismissAction: Boolean,
     override var duration: SnackbarDuration,
+    var snackBarAlignment: Alignment = Alignment.BottomStart,
     var customToastDesign: @Composable ((SnackbarData) -> Unit)?
 ) : SnackbarVisuals {
     override fun equals(other: Any?): Boolean {
@@ -300,6 +344,7 @@ open class BillLetterVisual(
         if (withDismissAction != other.withDismissAction) return false
         if (duration != other.duration) return false
         if (title != other.title) return false
+        if (snackBarAlignment != other.snackBarAlignment) return false
         if (customToastDesign != other::customToastDesign) return false
 
         return true
@@ -311,6 +356,7 @@ open class BillLetterVisual(
         result = 31 * result + withDismissAction.hashCode()
         result = 31 * result + duration.hashCode()
         result = 31 * result + title.hashCode()
+        result = 31 * result + snackBarAlignment.hashCode()
         result = 31 * result + customToastDesign.hashCode()
         return result
     }

@@ -65,7 +65,7 @@ import kotlinx.coroutines.delay
  * @param touchBlocking: If enabled, user touches will be blocked while the alert dialog is shown.
  * @param blockFilterColor: Only works if [touchBlocking] is enabled.
  * @param maxFilterAlpha: Only works if [touchBlocking] is enabled.
- * @param alignment: Only works if [touchBlocking] is enabled.
+ * @param snackBarAlignment: Only works if [touchBlocking] is enabled.
  * @param outsideClick: Only works if [touchBlocking] is enabled.
  * [Warning] This should be used with FloatingSnackBar.
  */
@@ -75,7 +75,7 @@ fun OpenAlertDialog(
     touchBlocking: Boolean = false,
     blockFilterColor: Color = Color.Transparent,
     maxFilterAlpha: Float = 0.2f,
-    alignment: Alignment = Alignment.Center,
+    snackBarAlignment: Alignment = Alignment.Center,
     outsideClick: (() -> Unit)? = null,
     dialog: @Composable () -> Unit
 ) {
@@ -99,7 +99,7 @@ fun OpenAlertDialog(
         if (outsideClick is (() -> Unit)) {
             modifier = modifier.clickable(MutableInteractionSource(), null) { outsideClick() }
         }
-        Box(modifier, alignment) {
+        Box(modifier, snackBarAlignment) {
             dialog()
         }
     } else {
@@ -112,6 +112,10 @@ fun OpenAlertDialog(
 fun FadeInFadeOutWithScale(
     current: SnackbarData?,
     modifier: Modifier = Modifier,
+    opacityEasing: Easing = LinearEasing,
+    scaleEasing: Easing = FastOutSlowInEasing,
+    onAnimationStarted: @Composable () -> Unit = {},
+    onAnimationFinished: (Boolean) -> Unit = {},
     content: @Composable (SnackbarData) -> Unit
 ) {
     val state = remember { FadeInFadeOutState<SnackbarData?>() }
@@ -130,22 +134,24 @@ fun FadeInFadeOutWithScale(
                 val animationDelay = if (isVisible && keys.filterNotNull().size != 1) delay else 0
                 val opacity = animatedOpacity(
                     animation = tween(
-                        easing = LinearEasing,
+                        easing = opacityEasing,
                         delayMillis = animationDelay,
                         durationMillis = duration
                     ),
                     visible = isVisible,
-                    onAnimationFinish = {
+                    onAnimationStarted = onAnimationStarted,
+                    onAnimationFinish = { visible ->
                         if (key != state.current) {
                             // leave only the current in the list
                             state.items.removeAll { it.key == key }
                             state.scope?.invalidate()
                         }
+                        onAnimationFinished(visible)
                     }
                 )
                 val scale = animatedScale(
                     animation = tween(
-                        easing = FastOutSlowInEasing,
+                        easing = scaleEasing,
                         delayMillis = animationDelay,
                         durationMillis = duration
                     ),
@@ -198,15 +204,17 @@ private typealias FadeInFadeOutTransition = @Composable (content: @Composable ()
 private fun animatedOpacity(
     animation: AnimationSpec<Float>,
     visible: Boolean,
-    onAnimationFinish: () -> Unit = {}
+    onAnimationStarted: @Composable () -> Unit = {},
+    onAnimationFinish: (Boolean) -> Unit = {}
 ): State<Float> {
     val alpha = remember { Animatable(if (!visible) 1f else 0f) }
+    onAnimationStarted()
     LaunchedEffect(visible) {
         alpha.animateTo(
             if (visible) 1f else 0f,
             animationSpec = animation
         )
-        onAnimationFinish()
+        onAnimationFinish(visible)
     }
     return alpha.asState()
 }

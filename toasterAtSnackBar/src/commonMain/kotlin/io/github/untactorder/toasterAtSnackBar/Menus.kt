@@ -607,7 +607,7 @@ fun InjectableSnackBar.launchAlertDialogWithPastelToast(
     touchBlocking: Boolean = false,
     blockFilterColor: Color = Color.Transparent,
     maxFilterAlpha: Float = 0.2f,
-    alignment: Alignment = Alignment.Center,
+    snackBarAlignment: Alignment = Alignment.Center,
     dismissed: () -> Unit = {}, performed: () -> Unit = {},
     enableOutsideClick: Boolean = false,
     customToastDesign: @Composable (SnackbarData) -> Unit = { data ->
@@ -616,5 +616,5 @@ fun InjectableSnackBar.launchAlertDialogWithPastelToast(
     }
 ) {
     launchAlertDialog(message, title, actionLabel, actionOnNewLine, withDismissAction, duration, isDialOpened, touchBlocking,
-        blockFilterColor, maxFilterAlpha, alignment, dismissed, performed, enableOutsideClick, customToastDesign)
+        blockFilterColor, maxFilterAlpha, snackBarAlignment, dismissed, performed, enableOutsideClick, customToastDesign)
 }
