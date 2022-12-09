@@ -6,5 +6,7 @@ import androidx.compose.runtime.Composable
 @Preview
 @Composable
 fun DesktopApp() {
-    App()
+    MaterialTheme {
+        App()
+    }
 }

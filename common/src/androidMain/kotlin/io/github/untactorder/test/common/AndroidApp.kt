@@ -14,5 +14,7 @@ import androidx.compose.ui.Modifier
 @Preview
 @Composable
 fun AndroidApp() {
-    App(Modifier.fillMaxSize().systemBarsPadding())
+    MaterialTheme {
+        App(Modifier.fillMaxSize().systemBarsPadding())
+    }
 }

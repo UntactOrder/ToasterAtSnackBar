@@ -79,6 +79,7 @@ kotlin {
     ).forEach {
         it.binaries.framework {
             baseName = "toasterAtSnackBar"
+            freeCompilerArgs += "-Xdisable-phases=VerifyBitcode"
         }
     }
 

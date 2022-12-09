@@ -15,14 +15,6 @@ import io.github.untactorder.toasterAtSnackBar.*
 
 @Composable
 fun App(modifier: Modifier = Modifier.fillMaxSize()) {
-    MaterialTheme {
-        MainScreen(modifier)
-    }
-}
-
-
-@Composable
-fun MainScreen(modifier: Modifier = Modifier.fillMaxSize()) {
     val scrollState = rememberScrollState()
     var textState by rememberSaveable { mutableStateOf("") }
     var boolState by rememberSaveable { mutableStateOf(true) }
