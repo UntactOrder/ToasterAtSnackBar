@@ -27,10 +27,7 @@ fun MainScreen(modifier: Modifier = Modifier.fillMaxSize()) {
     var textState by rememberSaveable { mutableStateOf("") }
     var boolState by rememberSaveable { mutableStateOf(true) }
 
-    val injector = InjectableSnackBar()
-    val changeAlignment = injector.changeAlignment
-
-    injector.FloatingSnackBar {
+    InjectableSnackBar().FloatingSnackBar { injector ->
         Column(
             modifier = modifier.verticalScroll(scrollState),
             verticalArrangement = Arrangement.Center,

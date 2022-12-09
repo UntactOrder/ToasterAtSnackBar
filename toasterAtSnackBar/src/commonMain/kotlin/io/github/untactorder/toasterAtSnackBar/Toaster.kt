@@ -55,6 +55,11 @@ open class InjectableSnackBar(
     snackbarHostState: SnackbarHostState? = null,
     lifecycleScope: CoroutineScope? = null
 ) {
+    companion object {
+        @Composable
+        fun getInstanceWithState() = InjectableSnackBar().issueState()
+    }
+
     private lateinit var snackbarHostState: SnackbarHostState
     private lateinit var lifecycleScope: CoroutineScope
 
@@ -64,15 +69,8 @@ open class InjectableSnackBar(
     val hostState: SnackbarHostState
         @Composable
         get() {
-            this.issueState()
+            issueState()
             return snackbarHostState
-        }
-
-    val changeAlignment: (Alignment) -> Unit
-        @Composable
-        get() {
-            this.issueState()
-            return { snackBarAlignment.value = it }
         }
 
     init {
@@ -85,7 +83,7 @@ open class InjectableSnackBar(
     }
 
     @Composable
-    private fun issueState() {
+    private fun issueState(): InjectableSnackBar {
         if (!this::snackbarHostState.isInitialized) {
             this.snackbarHostState = remember { SnackbarHostState() }
         }
@@ -96,6 +94,7 @@ open class InjectableSnackBar(
             this.snackBarAlignment = remember { mutableStateOf(Alignment.BottomStart) }
             this.isAnimating = remember { mutableStateOf(false) }
         }
+        return this
     }
 
     /**
@@ -106,9 +105,8 @@ open class InjectableSnackBar(
         snackBarModifier: Modifier = Modifier.wrapContentSize(),
         snackbarHost: @Composable (SnackbarHostState, MutableState<Alignment>, MutableState<Boolean>) -> Unit
         = { state, align, ani -> Bartender(state, snackBarAlignment = align, isAnimating = ani) },
-    ) {
-        issueState()  // state have to be issued before using
-
+    ): InjectableSnackBar {
+        val self = issueState()  // state have to be issued before using
         Surface(modifier = snackBarModifier, color = Color.Transparent, contentColor = contentColorFor(Color.Transparent)) {
             SubcomposeLayout { constraints ->
                 val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
@@ -138,6 +136,7 @@ open class InjectableSnackBar(
                 }
             }
         }
+        return self
     }
 
     /**
@@ -149,16 +148,17 @@ open class InjectableSnackBar(
         snackBarModifier: Modifier = Modifier.wrapContentSize(),
         snackbarHost: @Composable (SnackbarHostState, MutableState<Alignment>, MutableState<Boolean>) -> Unit
         = { state, align, ani -> Bartender(state, snackBarAlignment = align, isAnimating = ani) },
-        content: @Composable () -> Unit = {}
-    ) {
-        issueState()  // states have to be issued before using
+        content: @Composable (InjectableSnackBar) -> Unit = {}
+    ): InjectableSnackBar {
+        val self = issueState()  // states have to be issued before using
         Box(
             boxModifier,
             contentAlignment = snackBarAlignment.value
         ) {
-            content()
+            content(self)
             EmbeddedSnackBar(snackBarModifier, snackbarHost)
         }
+        return self
     }
 
     @OptIn(ExperimentalMaterial3Api::class)
